@@ -1,67 +1,60 @@
-/** Dud Football Apps Script Backend
- *  Sheet: 'submissions' with headers:
- *  timestamp | week | name | qb | rb | wr | te | k | total
- */
-const SHEET_NAME = 'submissions';
-const HEADERS = ['timestamp','week','name','qb','rb','wr','te','k','total'];
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dud Football — pick the worst, win the week</title>
+  <meta name="description" content="Dud Football: pick 1 QB, 1 RB, 1 WR, 1 TE, 1 K. Lowest fantasy score wins. +15 penalty for no stats." />
+  <style>
+    :root{--bg:#0b1220;--text:#e5e7eb;--muted:#94a3b8;--brand:#38bdf8;--surface:#111827;--radius:14px;--maxw:980px}
+    *{box-sizing:border-box} html,body{margin:0} body{font:16px/1.6 system-ui;background:var(--bg);color:var(--text)}
+    a{color:var(--brand);text-decoration:none} .container{max-width:var(--maxw);margin:0 auto;padding:24px}
+    header{position:sticky;top:0;background:#0b1220cc;border-bottom:1px solid #ffffff22;backdrop-filter:blur(6px)}
+    h1{margin:12px 0 8px;font-size:clamp(28px,5vw,44px)} .sub{color:var(--muted);margin:0 0 18px}
+    section{padding:28px 0;border-top:1px solid #ffffff22} .card{background:#ffffff08;border:1px solid #ffffff22;border-radius:var(--radius);padding:16px}
+    .grid{display:grid;gap:14px} .cols-2{grid-template-columns:repeat(2,1fr)} @media(max-width:800px){.cols-2{grid-template-columns:1fr}}
+    input,button{font:16px/1.2 system-ui} input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #ffffff33;background:transparent;color:var(--text)}
+    button{cursor:pointer;border:0;border-radius:999px;background:linear-gradient(135deg,#38bdf8,#22d3ee);color:#021018;font-weight:700;padding:12px 16px}
+    table{width:100%;border-collapse:collapse} th,td{padding:8px;border-bottom:1px solid #ffffff22;text-align:left} th{color:var(--muted)}
+    .note{color:var(--muted);font-size:.95rem}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Dud Football</h1>
+      <p class="sub">Since 2005-ish: pick 1 QB, RB, WR, TE, and K. Lowest total wins. <strong>+15</strong> if your player posts no stats.</p>
+    </div>
+  </header>
 
-function doPost(e) {
-  try {
-    const payload = JSON.parse(e.postData.contents || '{}');
-    const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
-    const ts = new Date();
-    // total can be blank now; you can fill later or compute via formula/another script
-    const row = [
-      ts,
-      payload.week,
-      payload.name,
-      payload.qb,
-      payload.rb,
-      payload.wr,
-      payload.te,
-      payload.k,
-      '' // total
-    ];
-    sheet.appendRow(row);
-    return json({ ok: true, message: 'Submitted!'}, 200);
-  } catch (err) {
-    return json({ ok:false, error: String(err) }, 500);
-  }
-}
+  <main class="container">
+    <section>
+      <h2>How it works</h2>
+      <div class="card">
+        <ol>
+          <li>Make your weekly picks (no draft, no exclusivity).</li>
+          <li>Lowest fantasy total wins; DNQ/no-stats = <strong>+15</strong> penalty.</li>
+          <li>Picks lock at kickoff of the first Sunday game (adjustable).</li>
+        </ol>
+      </div>
+    </section>
 
-function doGet(e) {
-  // GET ?view=standings returns rows as JSON for the front-end table
-  const view = (e.parameter.view || '').toLowerCase();
-  const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
-  if (view === 'standings') {
-    const values = sheet.getDataRange().getValues();
-    const [hdrs, ...rows] = values;
-    const h = indexHeaders(hdrs);
-    // You can sort here by week/total if you calculate totals in the sheet
-    const out = rows.filter(r => r[h.name]).map(r => ({
-      timestamp: r[h.timestamp],
-      week: String(r[h.week] || ''),
-      name: String(r[h.name] || ''),
-      qb: String(r[h.qb] || ''),
-      rb: String(r[h.rb] || ''),
-      wr: String(r[h.wr] || ''),
-      te: String(r[h.te] || ''),
-      k: String(r[h.k] || ''),
-      total: String(r[h.total] || '') // compute separately for now
-    }));
-    return json(out, 200);
-  }
-  return json({ ok:true, message:'Dud Football API' }, 200);
-}
+    <section>
+      <h2>Submit your picks</h2>
+      <p class="note">This form posts to a free Google Apps Script you’ll set up. Replace <code>SCRIPT_URL</code> below when ready.</p>
+      <div class="card">
+        <form id="dud-form">
+          <div class="grid cols-2">
+            <input name="week" type="number" min="1" max="22" placeholder="Week #" required />
+            <input name="name" placeholder="Your name" required />
+          </div>
+          <div class="grid cols-2" style="margin-top:12px">
+            <input name="qb"  placeholder="QB (e.g., Zach Wilson)" required />
+            <input name="rb"  placeholder="RB (e.g., AJ Dillon)" required />
+          </div>
+          <div class="grid cols-2" style="margin-top:12px">
+            <input name="wr"  placeholder="WR (e.g., Allen Robinson)" required />
+            <input name="te"  placeholder="TE (e.g., Mike Gesicki)" required />
+          </div>
+          <div style="margin-top:12px">
 
-/** Helpers */
-function json(obj, code) {
-  const out = ContentService.createTextOutput(JSON.stringify(obj));
-  out.setMimeType(ContentService.MimeType.JSON);
-  return out.setStatusCode(code || 200);
-}
-function indexHeaders(hdrs) {
-  const map = {};
-  HEADERS.forEach(k => map[k] = hdrs.indexOf(k));
-  return map;
-}
