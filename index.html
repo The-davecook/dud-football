@@ -3,58 +3,246 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dud Football — pick the worst, win the week</title>
-  <meta name="description" content="Dud Football: pick 1 QB, 1 RB, 1 WR, 1 TE, 1 K. Lowest fantasy score wins. +15 penalty for no stats." />
+  <title>Dud Football — Pick the worst, win the week</title>
+  <meta name="description" content="Dud Football: a weekly fantasy game where the lowest score wins. Pick 1 QB, 1 RB, 1 WR, 1 TE, 1 K. +15 penalty for no stats." />
+  <meta name="author" content="Your Name" />
+  <meta property="og:title" content="Dud Football" />
+  <meta property="og:description" content="A weekly game since 2005(ish): the lowest fantasy score wins." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%230f172a'/%3E%3Ctext x='50' y='58' font-size='48' text-anchor='middle' fill='white'%3E∗%3C/text%3E%3C/svg%3E" />
   <style>
-    :root{--bg:#0b1220;--text:#e5e7eb;--muted:#94a3b8;--brand:#38bdf8;--surface:#111827;--radius:14px;--maxw:980px}
-    *{box-sizing:border-box} html,body{margin:0} body{font:16px/1.6 system-ui;background:var(--bg);color:var(--text)}
-    a{color:var(--brand);text-decoration:none} .container{max-width:var(--maxw);margin:0 auto;padding:24px}
-    header{position:sticky;top:0;background:#0b1220cc;border-bottom:1px solid #ffffff22;backdrop-filter:blur(6px)}
-    h1{margin:12px 0 8px;font-size:clamp(28px,5vw,44px)} .sub{color:var(--muted);margin:0 0 18px}
-    section{padding:28px 0;border-top:1px solid #ffffff22} .card{background:#ffffff08;border:1px solid #ffffff22;border-radius:var(--radius);padding:16px}
-    .grid{display:grid;gap:14px} .cols-2{grid-template-columns:repeat(2,1fr)} @media(max-width:800px){.cols-2{grid-template-columns:1fr}}
-    input,button{font:16px/1.2 system-ui} input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #ffffff33;background:transparent;color:var(--text)}
-    button{cursor:pointer;border:0;border-radius:999px;background:linear-gradient(135deg,#38bdf8,#22d3ee);color:#021018;font-weight:700;padding:12px 16px}
-    table{width:100%;border-collapse:collapse} th,td{padding:8px;border-bottom:1px solid #ffffff22;text-align:left} th{color:var(--muted)}
-    .note{color:var(--muted);font-size:.95rem}
+    /* ===== Quick theme knobs ===== */
+    :root{
+      --bg: #0b1220;          /* background (dark indigo) */
+      --text: #e5e7eb;        /* text (zinc-200) */
+      --muted: #94a3b8;       /* secondary text */
+      --brand: #38bdf8;       /* accent (sky-400) */
+      --brand-2: #22d3ee;     /* accent 2 (cyan-400) */
+      --surface: #111827;     /* cards/nav */
+      --ring: rgba(56,189,248,.55);
+      --maxw: 1100px;
+      --radius: 16px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg: #ffffff;
+        --text: #111827;
+        --muted: #475569;
+        --surface: #f1f5f9;
+      }
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;scroll-behavior:smooth}
+    body{font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; color:var(--text); background:radial-gradient(1200px 600px at 10% 0%, rgba(34,211,238,.08), transparent 60%),radial-gradient(1000px 500px at 90% 10%, rgba(56,189,248,.08), transparent 60%), var(--bg)}
+    a{color:var(--brand);text-decoration:none}
+    a:hover{text-decoration:underline}
+    img{max-width:100%;display:block}
+    .container{max-width:var(--maxw);margin-inline:auto;padding:0 20px}
+
+    /* Header */
+    header{position:sticky;top:0;backdrop-filter:saturate(120%) blur(8px);background:linear-gradient(to bottom, rgba(17,24,39,.75), rgba(17,24,39,.35));border-bottom:1px solid rgba(148,163,184,.15);z-index:50}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+    .brand .logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#051016}
+    nav ul{display:flex;gap:18px;list-style:none;padding:0;margin:0}
+    nav a{color:var(--text);opacity:.9}
+    nav a:hover{opacity:1}
+
+    /* Hero */
+    .hero{padding:90px 0 60px}
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}
+    .hero h1{font-size:clamp(32px,6vw,54px);line-height:1.1;margin:0 0 10px}
+    .hero p{font-size:1.1rem;color:var(--muted);margin:0 0 18px}
+    .cta{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{appearance:none;border:none;background:linear-gradient(135deg,var(--brand),var(--brand-2));padding:12px 18px;border-radius:999px;color:#041014;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(34,211,238,.25)}
+    .btn.ghost{background:transparent;color:var(--text);border:1px solid rgba(148,163,184,.35)}
+
+    /* Sections */
+    section{padding:60px 0;border-top:1px solid rgba(148,163,184,.15)}
+    h2{font-size:clamp(24px,3.5vw,34px);margin:0 0 18px}
+    .sub{color:var(--muted);margin:0 0 28px}
+
+    /* Cards */
+    .grid{display:grid;gap:18px}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));border:1px solid rgba(148,163,184,.15);border-radius:var(--radius);padding:18px}
+    .card h3{margin:0 0 8px}
+    .meta{color:var(--muted);font-size:.95rem}
+
+    /* About */
+    .about{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+    /* Footer */
+    footer{padding:40px 0;border-top:1px solid rgba(148,163,184,.15);color:var(--muted)}
+    .footer-grid{display:grid;grid-template-columns:1fr auto;align-items:center}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .hero-grid, .about, .grid.cols-3, .grid.cols-2{grid-template-columns:1fr}
+      .hero{padding-top:70px}
+      nav ul{gap:12px}
+    }
+
+    /* Accessibility helpers */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+    :focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:10px}
   </style>
 </head>
 <body>
   <header>
-    <div class="container">
-      <h1>Dud Football</h1>
-      <p class="sub">Since 2005-ish: pick 1 QB, RB, WR, TE, and K. Lowest total wins. <strong>+15</strong> if your player posts no stats.</p>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px">
+      <a href="#top" style="font-weight:800;color:var(--text);text-decoration:none;font-size:1.1rem">Dud Football</a>
+      <nav aria-label="Primary">
+        <ul style="display:flex;gap:14px;list-style:none;margin:0;padding:0">
+          <li><a href="#top">Home</a></li>
+          <li><a href="#week1">Week 1</a></li>
+          <li><a href="#week5">Week 5</a></li>
+          <li><a href="#week9">Week 9</a></li>
+          <li><a href="#week13">Week 13</a></li>
+          <li><a href="#week17">Week 17</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </nav>
     </div>
   </header>
 
-  <main class="container">
-    <section>
-      <h2>How it works</h2>
-      <div class="card">
-        <ol>
-          <li>Make your weekly picks (no draft, no exclusivity).</li>
-          <li>Lowest fantasy total wins; DNQ/no-stats = <strong>+15</strong> penalty.</li>
-          <li>Picks lock at kickoff of the first Sunday game (adjustable).</li>
-        </ol>
-      </div>
-    </section>
-
+  <main class="container" id="top">
     <section>
       <h2>Submit your picks</h2>
-      <p class="note">This form posts to a free Google Apps Script you’ll set up. Replace <code>SCRIPT_URL</code> below when ready.</p>
+      <p class="note">Type your name and choose one player for each position. Manage the dropdowns via the <code>PLAYER_LISTS</code> object near the bottom of this file.</p>
       <div class="card">
         <form id="dud-form">
           <div class="grid cols-2">
-            <input name="week" type="number" min="1" max="22" placeholder="Week #" required />
             <input name="name" placeholder="Your name" required />
           </div>
           <div class="grid cols-2" style="margin-top:12px">
-            <input name="qb"  placeholder="QB (e.g., Zach Wilson)" required />
-            <input name="rb"  placeholder="RB (e.g., AJ Dillon)" required />
+            <select name="qb" required id="sel-qb"></select>
+            <select name="rb" required id="sel-rb"></select>
           </div>
           <div class="grid cols-2" style="margin-top:12px">
-            <input name="wr"  placeholder="WR (e.g., Allen Robinson)" required />
-            <input name="te"  placeholder="TE (e.g., Mike Gesicki)" required />
+            <select name="wr" required id="sel-wr"></select>
+            <select name="te" required id="sel-te"></select>
           </div>
           <div style="margin-top:12px">
+            <select name="k" required id="sel-k"></select>
+          </div>
+          <div style="margin-top:12px; display:flex; gap:10px; align-items:center">
+            <button type="submit">Submit picks</button>
+            <span id="form-status" class="note"></span>
+          </div>
+        </form>
+      </div>
+    </section>
 
+    <section id="week1">
+      <h2>Week 1</h2>
+      <p class="note">Standings can render here or on dedicated pages later.</p>
+      <div class="card" style="overflow:auto">
+        <table id="standings">
+          <thead><tr><th>Rank</th><th>Name</th><th>Total</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>K</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="week5"><h2>Week 5</h2><p class="note">Coming soon.</p></section>
+    <section id="week9"><h2>Week 9</h2><p class="note">Coming soon.</p></section>
+    <section id="week13"><h2>Week 13</h2><p class="note">Coming soon.</p></section>
+    <section id="week17"><h2>Week 17</h2><p class="note">Coming soon.</p></section>
+
+    <section id="about">
+      <h2>About</h2>
+      <div class="card">
+        <p>Started around 2005: a weekly twist on fantasy where the <em>lowest</em> score wins. We enforce +15 if your player posts no stats to prevent no‑plays. This site collects picks and will show standings from a Google Sheet.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <small>© <span id="year"></span> Your Name. All rights reserved.</small>
+      <small><a href="#top">Back to top ↑</a></small>
+    </div>
+  </footer>
+
+  <script>
+    // Replace with your Apps Script Web App URL after you deploy it:
+    const SCRIPT_URL = 'https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec';
+    const STANDINGS_URL = SCRIPT_URL + '?view=standings';
+
+    // ===== Player lists you manage =====
+    const PLAYER_LISTS = {
+      qb: ["— Select QB —","Zach Wilson","Mac Jones","Desmond Ridder","Justin Fields"],
+      rb: ["— Select RB —","AJ Dillon","Cam Akers","Najee Harris","Tyler Allgeier"],
+      wr: ["— Select WR —","Allen Robinson","Chase Claypool","Kadarius Toney","DJ Chark"],
+      te: ["— Select TE —","Mike Gesicki","Kyle Pitts","Cole Kmet","Tyler Conklin"],
+      k:  ["— Select K —","Eddy Piñeiro","Cade York","Greg Zuerlein","Younghoe Koo"]
+    };
+
+    function fillSelect(id, arr){
+      const el = document.getElementById(id);
+      el.innerHTML = arr.map((name,i)=>`<option value="${i===0?'':name}" ${i===0?'disabled selected':''}>${name}</option>`).join('');
+    }
+    fillSelect('sel-qb', PLAYER_LISTS.qb);
+    fillSelect('sel-rb', PLAYER_LISTS.rb);
+    fillSelect('sel-wr', PLAYER_LISTS.wr);
+    fillSelect('sel-te', PLAYER_LISTS.te);
+    fillSelect('sel-k',  PLAYER_LISTS.k);
+
+    const form = document.getElementById('dud-form');
+    const statusEl = document.getElementById('form-status');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.textContent = 'Submitting…';
+      const data = Object.fromEntries(new FormData(form).entries());
+      try{
+        const res = await fetch(SCRIPT_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+        const out = await res.json();
+        statusEl.textContent = out.message || 'Submitted!';
+        form.reset();
+        // restore placeholders after reset
+        fillSelect('sel-qb', PLAYER_LISTS.qb);
+        fillSelect('sel-rb', PLAYER_LISTS.rb);
+        fillSelect('sel-wr', PLAYER_LISTS.wr);
+        fillSelect('sel-te', PLAYER_LISTS.te);
+        fillSelect('sel-k',  PLAYER_LISTS.k);
+      }catch(err){
+        statusEl.textContent = 'Error. Try again or contact the commish.';
+      }
+    });
+
+    async function loadStandings(){
+      try{
+        const res = await fetch(STANDINGS_URL);
+        if(!res.ok) return;
+        const rows = await res.json();
+        const tbody = document.querySelector('#standings tbody');
+        tbody.innerHTML = rows.map((r,i)=>`<tr>
+          <td>${i+1}</td><td>${r.name||''}</td>
+          <td><strong>${r.total||''}</strong></td>
+          <td>${r.qb||''}</td><td>${r.rb||''}</td><td>${r.wr||''}</td><td>${r.te||''}</td><td>${r.k||''}</td>
+        </tr>`).join('');
+      }catch(e){}
+    }
+    loadStandings();
+  </script>
+
+  <!-- ===== Quick edit checklist =====
+    1) Replace all instances of "Your Name" and you@example.com
+    2) Update the hero headline + subhead
+    3) Swap the colors at the top of the CSS under :root if you want a new theme
+    4) Fill in Work cards and About highlights
+    5) Replace the hero placeholder card with an <img src="..." alt="..."> if you have a logo or photo
+    6) (Optional) Add a custom domain later; for now use free hosting below
+  -->
+</body>
+</html>
