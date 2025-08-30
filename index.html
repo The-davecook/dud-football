@@ -1,0 +1,67 @@
+/** Dud Football Apps Script Backend
+ *  Sheet: 'submissions' with headers:
+ *  timestamp | week | name | qb | rb | wr | te | k | total
+ */
+const SHEET_NAME = 'submissions';
+const HEADERS = ['timestamp','week','name','qb','rb','wr','te','k','total'];
+
+function doPost(e) {
+  try {
+    const payload = JSON.parse(e.postData.contents || '{}');
+    const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+    const ts = new Date();
+    // total can be blank now; you can fill later or compute via formula/another script
+    const row = [
+      ts,
+      payload.week,
+      payload.name,
+      payload.qb,
+      payload.rb,
+      payload.wr,
+      payload.te,
+      payload.k,
+      '' // total
+    ];
+    sheet.appendRow(row);
+    return json({ ok: true, message: 'Submitted!'}, 200);
+  } catch (err) {
+    return json({ ok:false, error: String(err) }, 500);
+  }
+}
+
+function doGet(e) {
+  // GET ?view=standings returns rows as JSON for the front-end table
+  const view = (e.parameter.view || '').toLowerCase();
+  const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  if (view === 'standings') {
+    const values = sheet.getDataRange().getValues();
+    const [hdrs, ...rows] = values;
+    const h = indexHeaders(hdrs);
+    // You can sort here by week/total if you calculate totals in the sheet
+    const out = rows.filter(r => r[h.name]).map(r => ({
+      timestamp: r[h.timestamp],
+      week: String(r[h.week] || ''),
+      name: String(r[h.name] || ''),
+      qb: String(r[h.qb] || ''),
+      rb: String(r[h.rb] || ''),
+      wr: String(r[h.wr] || ''),
+      te: String(r[h.te] || ''),
+      k: String(r[h.k] || ''),
+      total: String(r[h.total] || '') // compute separately for now
+    }));
+    return json(out, 200);
+  }
+  return json({ ok:true, message:'Dud Football API' }, 200);
+}
+
+/** Helpers */
+function json(obj, code) {
+  const out = ContentService.createTextOutput(JSON.stringify(obj));
+  out.setMimeType(ContentService.MimeType.JSON);
+  return out.setStatusCode(code || 200);
+}
+function indexHeaders(hdrs) {
+  const map = {};
+  HEADERS.forEach(k => map[k] = hdrs.indexOf(k));
+  return map;
+}
