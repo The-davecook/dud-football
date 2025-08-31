@@ -1,6 +1,5 @@
 {
   "currentWeek": 1,
-
   "positions": {
     "qb": ["Zach Wilson", "Mac Jones", "Desmond Ridder", "Justin Fields"],
     "rb": ["AJ Dillon", "Cam Akers", "Najee Harris", "Tyler Allgeier"],
@@ -8,15 +7,4 @@
     "te": ["Mike Gesicki", "Kyle Pitts", "Cole Kmet", "Tyler Conklin"],
     "k":  ["Eddy Piñeiro", "Cade York", "Greg Zuerlein", "Younghoe Koo"]
   }
-
-  /* OPTIONAL advanced format (use this if you want week-specific lists later):
-  ,"weeks": {
-    "1": {
-      "positions": { "qb": [...], "rb": [...], "wr": [...], "te": [...], "k": [...] }
-    },
-    "5": {
-      "positions": { "qb": [...], "rb": [...], "wr": [...], "te": [...], "k": [...] }
-    }
-  }
-  */
 }
