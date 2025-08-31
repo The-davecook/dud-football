@@ -137,7 +137,7 @@
   const STANDINGS_URL = SCRIPT_URL + '?view=standings';
 
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
-  const CSV_URL = ''; // e.g. 'https://docs.google.com/spreadsheets/d/.../pub?gid=0&single=true&output=csv'
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv'
 
   // === Your league roster (used for chips + name autocomplete) ===
   const ROSTER = [
@@ -168,3 +168,4 @@
       }
 
       const withPlaceholder = (arr, label)=> ['— Select ' + label + ' —', ...(arr || [])];
+
