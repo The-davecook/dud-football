@@ -76,7 +76,7 @@
     <section class="card">
       <h2>Featured Games</h2>
       <div class="featured" id="featured">
-        <!-- If you have images, replace each .slot with <img src="..." alt=""> -->
+        <!-- replace with <img src="..." alt=""> when ready -->
         <div class="slot">Feature 1</div>
         <div class="slot">Feature 2</div>
         <div class="slot">Feature 3</div>
@@ -168,32 +168,60 @@
       'David Cook','Alice','Bob','Carol','Dan','Eve'
     ];
 
-    // Player dropdowns you manage
-    const PLAYER_LISTS = {
-      qb: ['— Select QB —','Zach Wilson','Mac Jones','Desmond Ridder','Justin Fields'],
-      rb: ['— Select RB —','AJ Dillon','Cam Akers','Najee Harris','Tyler Allgeier'],
-      wr: ['— Select WR —','Allen Robinson','Chase Claypool','Kadarius Toney','DJ Chark'],
-      te: ['— Select TE —','Mike Gesicki','Kyle Pitts','Cole Kmet','Tyler Conklin'],
-      k:  ['— Select K —','Eddy Piñeiro','Cade York','Greg Zuerlein','Younghoe Koo']
-    };
+    // ---------- load players.json ----------
+    let LOADED_LISTS = null;
+    let CURRENT_WEEK = null;
 
-    /* === Helpers === */
+    async function loadPlayersJson(){
+      try{
+        // pick a week if passed as ?week=5, else use players.json's currentWeek
+        const qp = new URLSearchParams(location.search);
+        const weekOverride = qp.get('week');
+
+        const res = await fetch('players.json?v=' + Date.now(), {cache:'no-store'});
+        const data = await res.json();
+
+        CURRENT_WEEK = weekOverride || data.currentWeek || null;
+
+        // if a "weeks" object is present and we have a match, use that; otherwise use top-level "positions"
+        let pos = data.positions || {};
+        if (data.weeks && CURRENT_WEEK && data.weeks[String(CURRENT_WEEK)] && data.weeks[String(CURRENT_WEEK)].positions){
+          pos = data.weeks[String(CURRENT_WEEK)].positions;
+        }
+
+        // build lists with a disabled placeholder at the top
+        const withPlaceholder = (arr, label)=> ['— Select ' + label + ' —', ...(arr || [])];
+        LOADED_LISTS = {
+          qb: withPlaceholder(pos.qb, 'QB'),
+          rb: withPlaceholder(pos.rb, 'RB'),
+          wr: withPlaceholder(pos.wr, 'WR'),
+          te: withPlaceholder(pos.te, 'TE'),
+          k:  withPlaceholder(pos.k,  'K')
+        };
+      }catch(e){
+        // fallback if players.json missing or malformed
+        LOADED_LISTS = {
+          qb: ['— Select QB —'], rb: ['— Select RB —'], wr: ['— Select WR —'],
+          te: ['— Select TE —'], k: ['— Select K —']
+        };
+      }
+    }
+
     function fillSelect(id, arr){
       const el = document.getElementById(id);
       el.innerHTML = arr.map((name,i)=>`<option value="${i===0?'':name}" ${i===0?'disabled selected':''}>${name}</option>`).join('');
     }
-    ['qb','rb','wr','te','k'].forEach(pos => fillSelect('sel-'+pos, PLAYER_LISTS[pos]));
 
-    // Render roster chips
-    function renderChips(submittedSet=new Set()){
-      const box = document.getElementById('chips');
-      box.innerHTML = ROSTER.map(n=>{
-        const submitted = submittedSet.has(n.toLowerCase().trim());
-        return `<span class="chip ${submitted?'submitted':''}">${n}</span>`;
-      }).join('');
+    async function paintDropdowns(){
+      if (!LOADED_LISTS) await loadPlayersJson();
+      fillSelect('sel-qb', LOADED_LISTS.qb);
+      fillSelect('sel-rb', LOADED_LISTS.rb);
+      fillSelect('sel-wr', LOADED_LISTS.wr);
+      fillSelect('sel-te', LOADED_LISTS.te);
+      fillSelect('sel-k',  LOADED_LISTS.k);
     }
 
-    // Fetch standings rows (tries CSV first if provided, else JSON endpoint)
+    // ---------- standings + check-ins ----------
     async function fetchStandings(){
       try{
         if (CSV_URL){
@@ -216,19 +244,18 @@
           return await res.json();
         }
       }catch(e){
-        return []; // fail soft
+        return [];
       }
     }
 
-    // Update roster chips from current submissions
-    async function refreshCheckins(){
-      const rows = await fetchStandings();
-      const submitted = new Set(rows.map(r=>(r.name||'').toLowerCase().trim()));
-      renderChips(submitted);
-      return rows;
+    function renderChips(submittedSet=new Set()){
+      const box = document.getElementById('chips');
+      box.innerHTML = ROSTER.map(n=>{
+        const submitted = submittedSet.has(n.toLowerCase().trim());
+        return `<span class="chip ${submitted?'submitted':''}">${n}</span>`;
+      }).join('');
     }
 
-    // Standings rendering (only on manual reveal)
     function renderStandings(rows){
       const tbody = document.querySelector('#standings tbody');
       tbody.innerHTML = rows.map((r,i)=>`
@@ -238,7 +265,14 @@
         </tr>`).join('');
     }
 
-    // Submit picks (no-cors to avoid CORS headaches)
+    async function refreshCheckins(){
+      const rows = await fetchStandings();
+      const submitted = new Set(rows.map(r=>(r.name||'').toLowerCase().trim()));
+      renderChips(submitted);
+      return rows;
+    }
+
+    // ---------- submit ----------
     const form = document.getElementById('dud-form');
     const statusEl = document.getElementById('form-status');
     form?.addEventListener('submit', async (e)=>{
@@ -249,14 +283,14 @@
         await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
         statusEl.textContent = 'Submitted! (check sheet)';
         form.reset();
-        ['qb','rb','wr','te','k'].forEach(pos => fillSelect('sel-'+pos, PLAYER_LISTS[pos]));
-        await refreshCheckins(); // immediately reflect chip highlight
+        await paintDropdowns();           // refill from players.json (keeps placeholders)
+        await refreshCheckins();          // turn the player’s chip green
       }catch{
         statusEl.textContent = 'Error. Try again or contact the commish.';
       }
     });
 
-    // Manual reveal/hide for standings
+    // ---------- manual standings reveal ----------
     const btnToggle = document.getElementById('toggle-standings');
     const wrapStandings = document.getElementById('standings-wrap');
     let standingsLoaded = false;
@@ -267,7 +301,6 @@
         btnToggle.textContent = 'Show standings';
         return;
       }
-      // reveal
       wrapStandings.style.display = 'block';
       btnToggle.textContent = 'Hide standings';
       if (!standingsLoaded){
@@ -277,9 +310,12 @@
       }
     });
 
-    // Initial paint: roster chips only
-    renderChips(); // gray chips first
-    refreshCheckins(); // then paint green for those who already submitted
+    // ---------- boot ----------
+    (async function init(){
+      await paintDropdowns(); // load players.json + fill selects
+      renderChips();          // gray chips first
+      refreshCheckins();      // then paint green for those who already submitted
+    })();
   </script>
 </body>
 </html>
