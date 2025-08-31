@@ -19,15 +19,13 @@
     .card{background:var(--card);border:1px solid #e5e7eb;border-radius:12px;padding:16px}
     .note{color:var(--muted);font-size:.95rem}
 
-    /* Featured games (4 up) */
     .featured{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
     .featured .slot{
-      aspect-ratio: 16/9; border:1px dashed #cbd5e1; border-radius:10px;
-      display:flex; align-items:center; justify-content:center; color:#94a3b8; background:#fff;
+      aspect-ratio:16/9;border:1px dashed #cbd5e1;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;color:#94a3b8;background:#fff;
     }
     .featured img{width:100%;height:100%;object-fit:cover;border-radius:10px}
 
-    /* Compact form */
     form.compact{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     form.compact .full{grid-column:1 / -1}
     label{font-weight:600;font-size:.95rem}
@@ -35,289 +33,138 @@
     button{padding:.6rem 1rem;border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
     #form-status{margin-left:.6rem;color:var(--muted)}
 
-    /* Player check-in chips */
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{
-      padding:.45rem .7rem;border-radius:999px;background:var(--chip);color:var(--chipText);
-      border:1px solid #c7d2fe;font-weight:600;font-size:.9rem;
-    }
+    .chip{padding:.45rem .7rem;border-radius:999px;background:#eef2ff;color:#1e293b;border:1px solid #c7d2fe;font-weight:600;font-size:.9rem}
     .chip.submitted{background:#ecfdf5;border-color:#86efac;color:#166534}
     .chip.submitted::after{content:" ✓";color:var(--ok);font-weight:900}
 
-    /* Standings table (hidden by default) */
     #standings-wrap{display:none}
     table{width:100%;border-collapse:collapse}
     th,td{padding:.55rem;border-bottom:1px solid #e5e7eb;text-align:left}
     th{color:#374151}
     .controls{display:flex;gap:10px;align-items:center;margin:.5rem 0}
-    @media (max-width:700px){
-      .featured{grid-template-columns:1fr 1fr}
-      form.compact{grid-template-columns:1fr}
-    }
+    @media (max-width:700px){.featured{grid-template-columns:1fr 1fr} form.compact{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <header>
-    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
-      <div>
-        <h1>Dud Football</h1>
-        <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins. +15 for a no-stats player.</div>
-      </div>
-      <nav>
-        <a href="#home">Home</a>
-        <a href="#week1">Week 1</a>
-        <a href="#about">About</a>
-      </nav>
+<header>
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+    <div>
+      <h1>Dud Football</h1>
+      <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins. +15 for a no-stats player.</div>
     </div>
-  </header>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#week1">Week 1</a>
+      <a href="#about">About</a>
+    </nav>
+  </div>
+</header>
 
-  <main class="wrap" id="home" style="padding-top:16px">
-    <!-- Featured Games strip (drop your 4 images later) -->
-    <section class="card">
-      <h2>Featured Games</h2>
-      <div class="featured" id="featured">
-        <!-- replace with <img src="..." alt=""> when ready -->
-        <div class="slot">Feature 1</div>
-        <div class="slot">Feature 2</div>
-        <div class="slot">Feature 3</div>
-        <div class="slot">Feature 4</div>
-      </div>
-    </section>
+<main class="wrap" id="home" style="padding-top:16px">
+  <section class="card">
+    <h2>Featured Games</h2>
+    <div class="featured" id="featured">
+      <div class="slot">Feature 1</div>
+      <div class="slot">Feature 2</div>
+      <div class="slot">Feature 3</div>
+      <div class="slot">Feature 4</div>
+    </div>
+  </section>
 
-    <!-- Submit picks (compact form) -->
-    <section style="margin-top:18px">
-      <h2>Submit your picks</h2>
-      <div class="card">
-        <form id="dud-form" class="compact">
-          <div class="full">
-            <label>Name
-              <input type="text" name="name" required />
-            </label>
-          </div>
-
-          <label>QB
-            <select name="qb" id="sel-qb"></select>
+  <section style="margin-top:18px">
+    <h2>Submit your picks</h2>
+    <div class="card">
+      <form id="dud-form" class="compact">
+        <div class="full">
+          <label>Name
+            <input type="text" name="name" id="name-input" list="roster-list" autocomplete="off" required />
+            <datalist id="roster-list"></datalist>
           </label>
-          <label>RB
-            <select name="rb" id="sel-rb"></select>
-          </label>
-          <label>WR
-            <select name="wr" id="sel-wr"></select>
-          </label>
-          <label>TE
-            <select name="te" id="sel-te"></select>
-          </label>
-          <div class="full">
-            <label>K
-              <select name="k" id="sel-k"></select>
-            </label>
-          </div>
+        </div>
 
-          <div class="full controls">
-            <button type="submit">Submit picks</button>
-            <span id="form-status" class="note"></span>
-          </div>
-        </form>
-      </div>
-    </section>
+        <label>QB <select name="qb" id="sel-qb"></select></label>
+        <label>RB <select name="rb" id="sel-rb"></select></label>
+        <label>WR <select name="wr" id="sel-wr"></select></label>
+        <label>TE <select name="te" id="sel-te"></select></label>
+        <div class="full">
+          <label>K <select name="k" id="sel-k"></select></label>
+        </div>
 
-    <!-- Player check-in list -->
-    <section id="week1" style="margin-top:18px">
-      <h2>Player check-in</h2>
-      <div class="card">
-        <div class="note">Green = submitted this week</div>
-        <div id="chips" class="chips"></div>
-      </div>
-    </section>
+        <div class="full controls">
+          <button type="submit">Submit picks</button>
+          <span id="form-status" class="note"></span>
+        </div>
+      </form>
+    </div>
+  </section>
 
-    <!-- Standings (hidden until you manually show) -->
-    <section style="margin-top:18px">
-      <div class="controls">
-        <button id="toggle-standings" type="button">Show standings</button>
-        <span class="note">Table is hidden until you choose to reveal it.</span>
-      </div>
-      <div id="standings-wrap" class="card" style="overflow:auto">
-        <table id="standings">
-          <thead><tr>
-            <th>#</th><th>Name</th><th>Total</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>K</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+  <section id="week1" style="margin-top:18px">
+    <h2>Player check-in</h2>
+    <div class="card">
+      <div class="note">Green = submitted this week</div>
+      <div id="chips" class="chips"></div>
+    </div>
+  </section>
 
-    <section id="about" style="margin:18px 0 36px">
-      <h2>About</h2>
-      <div class="card">
-        Started in 2005-ish: the opposite of normal fantasy—lowest score wins!
-        We add +15 if your player posts no stats, so you can’t “no-play”.
-      </div>
-    </section>
-  </main>
+  <section style="margin-top:18px">
+    <div class="controls">
+      <button id="toggle-standings" type="button">Show standings</button>
+      <span class="note">Table is hidden until you choose to reveal it.</span>
+    </div>
+    <div id="standings-wrap" class="card" style="overflow:auto">
+      <table id="standings">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Total</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>K</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
 
-  <script>
-    /* === CONFIG === */
-    const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbxUFPgXA8EIcyDPmOSgXcWX-ADvi3NI9BdUDmvD6tVyozj6U5laRRwS-_CFnr3Y1u4S/exec';
-    const STANDINGS_URL = SCRIPT_URL + '?view=standings';
+  <section id="about" style="margin:18px 0 36px">
+    <h2>About</h2>
+    <div class="card">
+      Started in 2005-ish: the opposite of normal fantasy—lowest score wins!
+      We add +15 if your player posts no stats, so you can’t “no-play”.
+    </div>
+  </section>
+</main>
 
-    // Optional: if you publish your sheet to the web as CSV, paste that link here for rock-solid reads:
-    const CSV_URL = ''; // e.g. 'https://docs.google.com/spreadsheets/d/.../pub?gid=0&single=true&output=csv'
+<script>
+  /* === CONFIG === */
+  const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyHqOhNudJmmHKuxNlt7kp4Bl5NuZlRvNn_COO97N6kFHjxKa212LlIxQYzaSME2GVk/exec';
+  const STANDINGS_URL = SCRIPT_URL + '?view=standings';
 
-    // Your season roster (edit this!)
-    const ROSTER = [
-      'David Cook','Devin Hester','Chris Gotsch','Matt Rogers','Ryan Brunswick','Jason Muench'
-    ];
+  // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
+  const CSV_URL = ''; // e.g. 'https://docs.google.com/spreadsheets/d/.../pub?gid=0&single=true&output=csv'
 
-    // ---------- load players.json ----------
-    let LOADED_LISTS = null;
-    let CURRENT_WEEK = null;
+  // === Your league roster (used for chips + name autocomplete) ===
+  const ROSTER = [
+    'David Cook',
+    'Al Kremer','Adam McCloud','Chad Neff','Chris Gotsch','Dan Adams','Devin Hester',
+    'Doug Blatti','Eric Changler','Jason Muench','Jeremy Palese','Jim Altendorf',
+    'Mark Anderson','Matt Rogers','Michael Arrigoni','Matt Richards',
+    'Ryan Brunswick','Ryan Slattery','Tim Garis','Will Peterson'
+  ];
 
-    async function loadPlayersJson(){
-      try{
-        // pick a week if passed as ?week=5, else use players.json's currentWeek
-        const qp = new URLSearchParams(location.search);
-        const weekOverride = qp.get('week');
+  // ---------- load players.json ----------
+  let LOADED_LISTS = null;
+  let CURRENT_WEEK = null;
 
-        const res = await fetch('players.json?v=' + Date.now(), {cache:'no-store'});
-        const data = await res.json();
+  async function loadPlayersJson(){
+    try{
+      const qp = new URLSearchParams(location.search);
+      const weekOverride = qp.get('week');
 
-        CURRENT_WEEK = weekOverride || data.currentWeek || null;
+      const res = await fetch('players.json?v=' + Date.now(), {cache:'no-store'});
+      const data = await res.json();
 
-        // if a "weeks" object is present and we have a match, use that; otherwise use top-level "positions"
-        let pos = data.positions || {};
-        if (data.weeks && CURRENT_WEEK && data.weeks[String(CURRENT_WEEK)] && data.weeks[String(CURRENT_WEEK)].positions){
-          pos = data.weeks[String(CURRENT_WEEK)].positions;
-        }
+      CURRENT_WEEK = weekOverride || data.currentWeek || null;
 
-        // build lists with a disabled placeholder at the top
-        const withPlaceholder = (arr, label)=> ['— Select ' + label + ' —', ...(arr || [])];
-        LOADED_LISTS = {
-          qb: withPlaceholder(pos.qb, 'QB'),
-          rb: withPlaceholder(pos.rb, 'RB'),
-          wr: withPlaceholder(pos.wr, 'WR'),
-          te: withPlaceholder(pos.te, 'TE'),
-          k:  withPlaceholder(pos.k,  'K')
-        };
-      }catch(e){
-        // fallback if players.json missing or malformed
-        LOADED_LISTS = {
-          qb: ['— Select QB —'], rb: ['— Select RB —'], wr: ['— Select WR —'],
-          te: ['— Select TE —'], k: ['— Select K —']
-        };
+      let pos = data.positions || {};
+      if (data.weeks && CURRENT_WEEK && data.weeks[String(CURRENT_WEEK)]?.positions){
+        pos = data.weeks[String(CURRENT_WEEK)].positions;
       }
-    }
 
-    function fillSelect(id, arr){
-      const el = document.getElementById(id);
-      el.innerHTML = arr.map((name,i)=>`<option value="${i===0?'':name}" ${i===0?'disabled selected':''}>${name}</option>`).join('');
-    }
-
-    async function paintDropdowns(){
-      if (!LOADED_LISTS) await loadPlayersJson();
-      fillSelect('sel-qb', LOADED_LISTS.qb);
-      fillSelect('sel-rb', LOADED_LISTS.rb);
-      fillSelect('sel-wr', LOADED_LISTS.wr);
-      fillSelect('sel-te', LOADED_LISTS.te);
-      fillSelect('sel-k',  LOADED_LISTS.k);
-    }
-
-    // ---------- standings + check-ins ----------
-    async function fetchStandings(){
-      try{
-        if (CSV_URL){
-          const res = await fetch(CSV_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-          const text = await res.text();
-          const lines = text.trim().split(/\r?\n/);
-          const hdr = lines[0].split(',');
-          const idx = (h)=>hdr.indexOf(h);
-          return lines.slice(1).map(line=>{
-            const cols = line.split(',');
-            return {
-              name: cols[idx('name')] || '',
-              total: cols[idx('total')] || '',
-              qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-              te: cols[idx('te')]||'', k: cols[idx('k')]||''
-            };
-          }).filter(r=>r.name);
-        }else{
-          const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-          return await res.json();
-        }
-      }catch(e){
-        return [];
-      }
-    }
-
-    function renderChips(submittedSet=new Set()){
-      const box = document.getElementById('chips');
-      box.innerHTML = ROSTER.map(n=>{
-        const submitted = submittedSet.has(n.toLowerCase().trim());
-        return `<span class="chip ${submitted?'submitted':''}">${n}</span>`;
-      }).join('');
-    }
-
-    function renderStandings(rows){
-      const tbody = document.querySelector('#standings tbody');
-      tbody.innerHTML = rows.map((r,i)=>`
-        <tr>
-          <td>${i+1}</td><td>${r.name||''}</td><td><strong>${r.total||''}</strong></td>
-          <td>${r.qb||''}</td><td>${r.rb||''}</td><td>${r.wr||''}</td><td>${r.te||''}</td><td>${r.k||''}</td>
-        </tr>`).join('');
-    }
-
-    async function refreshCheckins(){
-      const rows = await fetchStandings();
-      const submitted = new Set(rows.map(r=>(r.name||'').toLowerCase().trim()));
-      renderChips(submitted);
-      return rows;
-    }
-
-    // ---------- submit ----------
-    const form = document.getElementById('dud-form');
-    const statusEl = document.getElementById('form-status');
-    form?.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      statusEl.textContent = 'Submitting…';
-      try{
-        const fd = new FormData(form);
-        await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
-        statusEl.textContent = 'Submitted! (check sheet)';
-        form.reset();
-        await paintDropdowns();           // refill from players.json (keeps placeholders)
-        await refreshCheckins();          // turn the player’s chip green
-      }catch{
-        statusEl.textContent = 'Error. Try again or contact the commish.';
-      }
-    });
-
-    // ---------- manual standings reveal ----------
-    const btnToggle = document.getElementById('toggle-standings');
-    const wrapStandings = document.getElementById('standings-wrap');
-    let standingsLoaded = false;
-    btnToggle.addEventListener('click', async ()=>{
-      const showing = wrapStandings.style.display === 'block';
-      if (showing){
-        wrapStandings.style.display = 'none';
-        btnToggle.textContent = 'Show standings';
-        return;
-      }
-      wrapStandings.style.display = 'block';
-      btnToggle.textContent = 'Hide standings';
-      if (!standingsLoaded){
-        const rows = await fetchStandings();
-        renderStandings(rows);
-        standingsLoaded = true;
-      }
-    });
-
-    // ---------- boot ----------
-    (async function init(){
-      await paintDropdowns(); // load players.json + fill selects
-      renderChips();          // gray chips first
-      refreshCheckins();      // then paint green for those who already submitted
-    })();
-  </script>
-</body>
-</html>
-
-
+      const withPlaceholder = (arr, label)=> ['— Select ' + label + ' —', ...(arr || [])];
