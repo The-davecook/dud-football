@@ -146,13 +146,13 @@
   </section>
 </main>
 
-<script>
+  <script>
   /* === CONFIG === */
   const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyHqOhNudJmmHKuxNlt7kp4Bl5NuZlRvNn_COO97N6kFHjxKa212LlIxQYzaSME2GVk/exec';
   const STANDINGS_URL = SCRIPT_URL + '?view=standings';
 
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
-  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv'
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv';
 
   /* Remember the last name typed so players don't retype it every week */
   (function persistName() {
@@ -165,22 +165,22 @@
   })();
 
   function validatePicks() {
-  const need = [
-    ['sel-qb', 'QB'],
-    ['sel-rb', 'RB'],
-    ['sel-wr', 'WR'],
-    ['sel-te', 'TE'],
-    ['sel-k',  'K']
-  ];
-  for (const [id,label] of need) {
-    const v = document.getElementById(id)?.value || '';
-    if (!v) return `Please select a ${label}.`;
+    const need = [
+      ['sel-qb', 'QB'],
+      ['sel-rb', 'RB'],
+      ['sel-wr', 'WR'],
+      ['sel-te', 'TE'],
+      ['sel-k',  'K']
+    ];
+    for (const [id,label] of need) {
+      const v = document.getElementById(id)?.value || '';
+      if (!v) return `Please select a ${label}.`;
+    }
+    const nm = (document.getElementById('name-input')?.value || '').trim();
+    if (!nm) return 'Please enter your name.';
+    return '';
   }
-  const nm = (document.getElementById('name-input')?.value || '').trim();
-  if (!nm) return 'Please enter your name.';
-  return '';
-}
-  
+
   // === League roster (for autocomplete + chips) ===
   const ROSTER = [
     'David Cook',
@@ -353,35 +353,35 @@
   }
 
   // ---------- submit ----------
-const form = document.getElementById('dud-form');
-const statusEl = document.getElementById('form-status');
+  const form = document.getElementById('dud-form');
+  const statusEl = document.getElementById('form-status');
 
-form?.addEventListener('submit', async (e)=>{
-  e.preventDefault();
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
 
-  // ✅ run validation BEFORE doing anything else
-  const err = validatePicks();
-  if (err) {
-    statusEl.textContent = err;
-    return; // stop submit
-  }
+    // ✅ run validation BEFORE doing anything else
+    const err = validatePicks();
+    if (err) {
+      statusEl.textContent = err;
+      return; // stop submit
+    }
 
-  statusEl.textContent = 'Submitting…';
-  try{
-    const fd = new FormData(form);
-    const nameJustSubmitted = (nameInput.value || '').trim();
+    statusEl.textContent = 'Submitting…';
+    try{
+      const fd = new FormData(form);
+      const nameJustSubmitted = (nameInput.value || '').trim();
 
-    await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
-    statusEl.textContent = 'Submitted! (check sheet)';
+      await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
+      statusEl.textContent = 'Submitted! (check sheet)';
 
-    form.reset();
-    await paintDropdowns();                    // keep placeholders
-    markChipAsSubmitted(nameJustSubmitted);    // instant green
-    try { await refreshCheckins(); } catch {}
-  }catch{
-    statusEl.textContent = 'Error. Try again or contact the commish.';
-  }
-});
+      form.reset();
+      await paintDropdowns();                    // keep placeholders
+      markChipAsSubmitted(nameJustSubmitted);    // instant green
+      try { await refreshCheckins(); } catch {}
+    }catch{
+      statusEl.textContent = 'Error. Try again or contact the commish.';
+    }
+  });
 
   // ---------- manual standings reveal ----------
   const btnToggle = document.getElementById('toggle-standings');
@@ -410,8 +410,12 @@ form?.addEventListener('submit', async (e)=>{
     refreshCheckins();          // green for already-submitted (needs CSV_URL or CORS-friendly GET)
   })();
 </script>
+
+
+  
 </body>
 </html>
+
 
 
 
