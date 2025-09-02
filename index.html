@@ -5,12 +5,65 @@
   <title>Dud Football</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+
   <!-- ========== STYLES ========== -->
   <style>
     :root{
       --bg:#f8fbfd; --text:#111; --link:#0366d6; --card:#fff; --muted:#6b7280;
       --accent:#0ea5e9; --ok:#16a34a; --chip:#eef2ff; --chipText:#1e293b;
     }
+
+   /* Brand palette + subtle gradient for the title */
+:root{
+  --brand1:#0ea5e9;        /* your accent */
+  --brand2:#6366f1;        /* secondary accent */
+  --brand3:#14b8a6;        /* mint hint */
+}
+
+/* Header polish */
+header{
+  position:sticky; top:0; z-index:1000;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid #e5e7eb;
+  box-shadow:0 6px 18px rgba(2,6,23,.06);
+}
+
+/* Brand block */
+.brand-title{
+  font-family:"Outfit",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-weight:800; font-size:clamp(24px,3.2vw,34px); line-height:1.05; margin:.15rem 0 .25rem;
+  background:linear-gradient(90deg,var(--brand1),var(--brand2) 55%,var(--brand3));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  letter-spacing:.2px;
+}
+
+.tagline{
+  font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:#475569; /* slate-600 */
+  font-size:clamp(13px,1.5vw,15px);
+  margin:0;
+}
+.tagline strong{ color:var(--brand1); font-weight:700 }
+
+/* Nav tweaks */
+nav a{
+  font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:#0f172a; /* slate-950 */
+  font-weight:600;
+  text-decoration:none;
+  padding:.35rem .6rem;
+  border-radius:10px;
+  transition:background .2s ease, color .2s ease;
+}
+nav a:hover{ background:#eef2ff; color:#3730a3 } /* soft indigo hover */
+ 
+    
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--text)}
     header{position:sticky;top:0;background:#ffffffcc;backdrop-filter:blur(6px);border-bottom:1px solid #e5e7eb}
@@ -209,9 +262,10 @@ header{
 <header>
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
     <div>
-      <h1>Dud Football</h1>
-      <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins. This is dud.</div>
-      <div id="players-status" class="statusbar">Loading player lists…</div>
+      <h1 class="brand-title">Dud Football</h1>
+      <p id="tagline" class="tagline">
+        Pick one QB, RB, WR, TE, K. Lowest total wins. <strong>+15</strong> for a no-stats player.
+      </p>
     </div>
     <nav>
       <a href="#home">Home</a>
@@ -220,6 +274,7 @@ header{
     </nav>
   </div>
 </header>
+
 
 <main class="wrap" id="home" style="padding-top:16px">
   <!-- ========== FEATURED GAMES ========== -->
@@ -396,6 +451,27 @@ header{
 
 <!-- ========== SCRIPTS ========== -->
 <script>
+
+function setRandomTagline() {
+  const TAGLINES = [
+    'The best entertainment $1 will buy ya.',
+    'New format. Same old Dan Adams slow to get picks in.',
+    'Season XVIII. Still going strong, even without Delzell',
+    'Who else makes Lawrence Vickers famous?',
+    'Mediocrity is underrated.',
+    'Benchwarmers welcome.',
+    'Make bad choices. Get good results.',
+    'You havent lived until youve done a dud raid.',
+    'Giving you reasons to watch the NFC East.',
+    'Where were you when Sam Darnold was sacked 9 times?',
+    'Dud-riffic since 2008. #YamonFigures',
+    'Points are bad. You’re good at bad.'
+  ];
+  const el = document.getElementById('tagline');
+  if (el) el.textContent = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
+}
+
+  
   /* =========================
      CONFIG: back-end endpoints
      ========================= */
@@ -834,6 +910,7 @@ header{
      BOOT
      ========================= */
   (async function init(){
+    setRandomTagline();             
     // record week in hidden field
     const weekField = document.getElementById('week-field');
     if (weekField) weekField.value = ACTIVE_WEEK;
@@ -847,6 +924,7 @@ header{
 </script>
 </body>
 </html>
+
 
 
 
