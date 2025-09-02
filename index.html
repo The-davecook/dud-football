@@ -128,8 +128,15 @@
           <span id="form-status" class="note"></span>
         </div>
 
-        <!-- optional: record the week number with each submission -->
-        <input type="hidden" name="week" id="week-field">
+        <!-- inside <form id="dud-form" class="compact"> ... -->
+<div class="full controls">
+  <button type="submit">Submit picks</button>
+  <span id="form-status" class="note"></span>
+</div>
+
+<!-- ✅ record the week number with each submission -->
+<input type="hidden" name="week" id="week-field" />
+
       </form>
     </div>
   </div>
@@ -146,7 +153,7 @@
 
 <!-- Full-width standings (auto-reveals at noon) -->
 
-    <section id="standings-section" style="margin-top:18px">
+<section id="standings-section" style="margin-top:18px">
   <div id="reveal-note" class="note">
     Picks will be revealed at Noon Central on Sunday.
   </div>
@@ -154,12 +161,18 @@
   <div id="standings-wrap" class="card" style="overflow:auto; display:none">
     <table id="standings">
       <thead><tr>
-        <th>#</th><th>Name</th><th>Total</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>K</th>
+        <th>#</th><th>Name</th><th>Total</th>
+        <th>QB</th><th>QB Pts</th>
+        <th>RB</th><th>RB Pts</th>
+        <th>WR</th><th>WR Pts</th>
+        <th>TE</th><th>TE Pts</th>
+        <th>K</th><th>K Pts</th>
       </tr></thead>
       <tbody></tbody>
     </table>
   </div>
 </section>
+
 
   <section style="margin-top:18px">
     <div class="controls">
@@ -186,7 +199,7 @@
 
   <script>
   /* === CONFIG === */
-  const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyHqOhNudJmmHKuxNlt7kp4Bl5NuZlRvNn_COO97N6kFHjxKa212LlIxQYzaSME2GVk/exec';
+  const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbzyyG10SKxPbhrLEoGlTvLUb2DoMVKurSC9KRRwZCBYYRzvHaAzOcH3H1_UQzhjt-V1/exec';
   const STANDINGS_URL = SCRIPT_URL + '?view=standings';
 
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
@@ -423,34 +436,60 @@ async function fetchStandings(){
       const lines = text.trim().split(/\r?\n/);
       const hdr = lines[0].split(',');
       const idx = (h)=>hdr.indexOf(h);
+
+      const qi = idx('qb_pts'), ri = idx('rb_pts'), wi = idx('wr_pts'),
+            ti = idx('te_pts'), ki = idx('k_pts'), toti = idx('total');
+
+      const toNum = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+
       return lines.slice(1).map(line=>{
         const cols = line.split(',');
-        return {
+        const row = {
           name: cols[idx('name')] || '',
-          total: cols[idx('total')] || '',
           qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-          te: cols[idx('te')]||'', k: cols[idx('k')]||''
+          te: cols[idx('te')]||'', k: cols[idx('k')]||'',
+          qb_pts: qi>-1 ? cols[qi] : '',
+          rb_pts: ri>-1 ? cols[ri] : '',
+          wr_pts: wi>-1 ? cols[wi] : '',
+          te_pts: ti>-1 ? cols[ti] : '',
+          k_pts:  ki>-1 ? cols[ki] : '',
+          total:  toti>-1 ? cols[toti] : ''
         };
+        // compute total if missing
+        if (!row.total) {
+          row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
+        }
+        return row;
       }).filter(r=>r.name);
     }else{
-      // fallback: Apps Script JSON (may be CORS-blocked for non-you visitors)
+      // fallback (Apps Script JSON)
       const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
       return await res.json();
     }
   }catch(e){
-    return []; // fail-soft
+    return [];
   }
 }
 
+
     
-  function renderStandings(rows){
-    const tbody = document.querySelector('#standings tbody');
-    tbody.innerHTML = rows.map((r,i)=>`
-      <tr>
-        <td>${i+1}</td><td>${r.name||''}</td><td><strong>${r.total||''}</strong></td>
-        <td>${r.qb||''}</td><td>${r.rb||''}</td><td>${r.wr||''}</td><td>${r.te||''}</td><td>${r.k||''}</td>
-      </tr>`).join('');
-  }
+function renderStandings(rows){
+  const tbody = document.querySelector('#standings tbody');
+  tbody.innerHTML = rows.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.name||''}</td>
+      <td><strong>${r.total||''}</strong></td>
+
+      <td>${r.qb||''}</td><td>${r.qb_pts||''}</td>
+      <td>${r.rb||''}</td><td>${r.rb_pts||''}</td>
+      <td>${r.wr||''}</td><td>${r.wr_pts||''}</td>
+      <td>${r.te||''}</td><td>${r.te_pts||''}</td>
+      <td>${r.k||''}</td><td>${r.k_pts||''}</td>
+    </tr>
+  `).join('');
+}
+
   async function refreshCheckins(){
     const rows = await fetchStandings();
     const submitted = new Set(rows.map(r=>(r.name||'').toLowerCase().trim()));
@@ -490,11 +529,20 @@ async function fetchStandings(){
   });
 
    // ---------- boot ----------
-  (async function init(){
-    await paintDropdowns();     // loads players.json or fallback
-    renderChips();              // gray chips first
-    refreshCheckins();          // green for already-submitted (needs CSV_URL or CORS-friendly GET)
-  })();
+// ---------- boot ----------
+(async function init(){
+  // ✅ set week hidden field for submissions
+  const weekField = document.getElementById('week-field');
+  if (weekField) weekField.value = ACTIVE_WEEK;
+
+  await paintDropdowns();
+  renderChips();
+  refreshCheckins();
+
+  // if you're using the auto-reveal gate:
+  applyRevealGate?.();
+})();
+
 
     applyRevealGate(); // show note or standings based on current time
 
@@ -507,6 +555,7 @@ setInterval(() => { refreshCheckins(); }, 60000);
   
 </body>
 </html>
+
 
 
 
