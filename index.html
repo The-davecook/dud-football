@@ -73,6 +73,27 @@
       .featured{grid-template-columns:1fr 1fr}
       form.compact{grid-template-columns:1fr}
     }
+
+    /* Prominent reveal message that looks like the table section */
+.reveal-card.card{
+  display:flex; align-items:center; gap:16px;
+  padding:20px 18px;
+}
+.reveal-icon{
+  flex:0 0 44px; width:44px; height:44px;
+  display:grid; place-items:center;
+  border-radius:999px;
+  background:#fee2e2; color:#b91c1c; /* soft red lock bubble */
+  font-size:22px; line-height:1;
+}
+.reveal-card h3{
+  margin:0 0 6px; font-size:1.125rem; /* 18px */
+}
+.reveal-card p{
+  margin:0; font-size:1.05rem; color:#334155;
+}
+.reveal-card p strong{ font-weight:800; }
+    
   </style>
 </head>
 <body>
@@ -184,25 +205,37 @@
   </section>
 
   <!-- ========== STANDINGS (AUTO-REVEAL AT NOON CENTRAL) ========== -->
-  <section id="standings-section" style="margin-top:18px">
-    <div id="reveal-note" class="note">
-      Picks will be revealed at Noon Central on Sunday.
+  <!-- BIG notice card shown while picks are hidden -->
+  <div id="reveal-note" class="card reveal-card" role="status" aria-live="polite">
+    <div class="reveal-icon">🔒</div>
+    <div>
+      <h3>Standings locked</h3>
+      <p>Picks will be revealed at <strong>Noon Central</strong> on Sunday.</p>
     </div>
+  </div>
 
-    <div id="standings-wrap" class="card" style="overflow:auto; display:none">
-      <table id="standings">
-        <thead><tr>
-          <th>#</th><th>Name</th><th>Total</th>
-          <th>QB</th><th>QB Pts</th>
-          <th>RB</th><th>RB Pts</th>
-          <th>WR</th><th>WR Pts</th>
-          <th>TE</th><th>TE Pts</th>
-          <th>K</th><th>K Pts</th>
-        </tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
+   <div id="standings-wrap" class="card" style="overflow:auto; display:none">
+    <table id="standings">
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th>
+          <th>Total</th>
+          <th>QB</th>
+          <th>QB Pts</th>
+          <th>RB</th>
+          <th>RB Pts</th>
+          <th>WR</th>
+          <th>WR Pts</th>
+          <th>TE</th>
+          <th>TE Pts</th>
+          <th>K</th>
+          <th>K Pts</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
 
   <!-- About -->
   <section id="about" style="margin:18px 0 36px">
@@ -666,5 +699,6 @@
 </script>
 </body>
 </html>
+
 
 
