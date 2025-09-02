@@ -67,7 +67,12 @@
     /* Two-column layout: form (2/3) + chips (1/3) on desktop; stacked on mobile */
     .twocol { display:grid; grid-template-columns: 2fr 1fr; gap:16px; }
     @media (max-width: 900px){ .twocol { grid-template-columns: 1fr; } }
-    @media (max-width:700px){ .featured{grid-template-columns:1fr 1fr} form.compact{grid-template-columns:1fr} }
+
+    /* Mobile tweaks */
+    @media (max-width:700px){
+      .featured{grid-template-columns:1fr 1fr}
+      form.compact{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
@@ -75,7 +80,7 @@
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
     <div>
       <h1>Dud Football</h1>
-      <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins. This is dud.</div>
+      <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins. +15 for a no-stats player.</div>
       <div id="players-status" class="statusbar">Loading player lists…</div>
     </div>
     <nav>
@@ -89,7 +94,7 @@
 <main class="wrap" id="home" style="padding-top:16px">
   <!-- ========== FEATURED GAMES ========== -->
   <section class="card">
-    <h2>Week 1 Games</h2>
+    <h2>This Week's Games</h2>
     <div class="featured" id="featured">
       <div class="slot"><img src="tnf_cow_eag.jpg" alt="TNF: Cowboys @ Eagles"></div>
       <div class="slot"><img src="fnf_ke_lac.jpg" alt="Thursday Night Football"></div>
@@ -115,11 +120,45 @@
 
           <!-- Position dropdowns (populated from players.json or fallback) -->
           <label>QB <select name="qb" id="sel-qb"></select></label>
+          <!-- Other QB write-in -->
+          <div class="full" id="qb-other-wrap" style="display:none">
+            <label>Other QB
+              <input type="text" id="qb-other" placeholder="e.g., Blaine Gabbert (KC)">
+            </label>
+          </div>
+
           <label>RB <select name="rb" id="sel-rb"></select></label>
+          <!-- Other RB write-in -->
+          <div class="full" id="rb-other-wrap" style="display:none">
+            <label>Other RB
+              <input type="text" id="rb-other" placeholder="e.g., Veteran RB (DET)">
+            </label>
+          </div>
+
           <label>WR <select name="wr" id="sel-wr"></select></label>
+          <!-- Other WR write-in -->
+          <div class="full" id="wr-other-wrap" style="display:none">
+            <label>Other WR
+              <input type="text" id="wr-other" placeholder="e.g., Practice WR (GB)">
+            </label>
+          </div>
+
           <label>TE <select name="te" id="sel-te"></select></label>
+          <!-- Other TE write-in -->
+          <div class="full" id="te-other-wrap" style="display:none">
+            <label>Other TE
+              <input type="text" id="te-other" placeholder="e.g., Call-up TE (MIN)">
+            </label>
+          </div>
+
           <div class="full">
             <label>K <select name="k" id="sel-k"></select></label>
+          </div>
+          <!-- Other K write-in -->
+          <div class="full" id="k-other-wrap" style="display:none">
+            <label>Other K
+              <input type="text" id="k-other" placeholder="e.g., Emergency K (PHI)">
+            </label>
           </div>
 
           <!-- Submit controls -->
@@ -169,7 +208,7 @@
   <section id="about" style="margin:18px 0 36px">
     <h2>About</h2>
     <div class="card">
-    Dud Football. Providing 4th Quarter mayhem to Jay Muench since 2008.
+    Dud Football. Providing 4th quarter mayhem to Jay Muench since 2008. #YamonFigures
     </div>
   </section>
 </main>
@@ -179,13 +218,11 @@
   /* =========================
      CONFIG: back-end endpoints
      ========================= */
- 
-  const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbzyyG10SKxPbhrLEoGlTvLUb2DoMVKurSC9KRRwZCBYYRzvHaAzOcH3H1_UQzhjt-V1/exec';
+  const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbyHqOhNudJmmHKuxNlt7kp4Bl5NuZlRvNn_COO97N6kFHjxKa212LlIxQYzaSME2GVk/exec';
   const STANDINGS_URL = SCRIPT_URL + '?view=standings';
 
-  // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
+  // (Legacy single-CSV fallback; site now uses WEEK_CSV below if present)
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv';
-
 
   /* =========================
      WEEK & REVEAL SCHEDULE
@@ -258,6 +295,20 @@
       const v = document.getElementById(id)?.value || '';
       if (!v) return `Please select a ${label}.`;
     }
+    // If “Other…” chosen for any, enforce the write-in
+    const pairs = [
+      ['sel-qb','qb-other','QB'],
+      ['sel-rb','rb-other','RB'],
+      ['sel-wr','wr-other','WR'],
+      ['sel-te','te-other','TE'],
+      ['sel-k','k-other','K'],
+    ];
+    for (const [selId,inputId,label] of pairs){
+      if (document.getElementById(selId)?.value === 'other' &&
+          !(document.getElementById(inputId)?.value || '').trim()){
+        return `Please type the other ${label}.`;
+      }
+    }
     const nm = (document.getElementById('name-input')?.value || '').trim();
     if (!nm) return 'Please enter your name.';
     return '';
@@ -278,6 +329,7 @@
   /* =========================
      PLAYERS LISTS (dropdowns)
      - Loads players.json; falls back if missing
+     - QB/K use starters-only (+ Other…); RB/WR/TE show full list (+ Other…)
      ========================= */
   const FALLBACK_LISTS = {
     qb: ['— Select QB —','Zach Wilson','Mac Jones','Desmond Ridder','Justin Fields'],
@@ -318,17 +370,74 @@
     LOADED_LISTS = FALLBACK_LISTS;
     setPlayersStatus('Using built-in player lists (players.json not found or invalid).', 'warn');
   }
+
+  // Keep only the first QB/K per team (assumes starters come first in players.json)
+  function startersOnly(list, label){
+    const out = ['— Select ' + label + ' —'];
+    const seen = new Set();
+    for (const item of (list || []).slice(1)) { // skip placeholder
+      const m = item && item.match(/\(([^)]+)\)\s*$/); // "Name (TEAM)" -> TEAM
+      const team = m ? m[1] : '';
+      if (!team || !seen.has(team)) { seen.add(team); out.push(item); }
+    }
+    out.push('Other…'); // sentinel
+    return out;
+  }
+
+  // Standard select filler with 'Other…' sentinel support
   function fillSelect(id, arr){
     const el = document.getElementById(id);
-    el.innerHTML = arr.map((name,i)=>`<option value="${i===0?'':name}" ${i===0?'disabled selected':''}>${name}</option>`).join('');
+    el.innerHTML = (arr || []).map((name,i)=>{
+      const isPH = (i===0);
+      const val  = (name === 'Other…') ? 'other' : (isPH ? '' : name);
+      const attrs = [ `value="${val.replace(/"/g,'&quot;')}"`, isPH ? 'disabled selected' : '' ].join(' ');
+      return `<option ${attrs}>${name}</option>`;
+    }).join('');
   }
+
+  // Append 'Other…' to a full list (ensuring placeholder exists)
+  function withOther(list, label){
+    const base = list?.slice() || [];
+    if (!base.length || !/^— Select /.test(base[0])) base.unshift('— Select ' + label + ' —');
+    if (base[base.length-1] !== 'Other…') base.push('Other…');
+    return base;
+  }
+
+  // Show write-in input when 'Other…' is chosen
+  function wireOtherToggle(selectId, wrapId, inputId){
+    const sel = document.getElementById(selectId);
+    const wrap = document.getElementById(wrapId);
+    const input = document.getElementById(inputId);
+    function update(){
+      const isOther = sel.value === 'other';
+      wrap.style.display = isOther ? 'block' : 'none';
+      if (input) input.required = isOther;
+      if (!isOther && input) input.value = '';
+    }
+    sel.addEventListener('change', update);
+    update();
+  }
+
+  // Build all dropdowns
   async function paintDropdowns(){
     if (!LOADED_LISTS) await loadPlayersJson();
-    fillSelect('sel-qb', LOADED_LISTS.qb);
-    fillSelect('sel-rb', LOADED_LISTS.rb);
-    fillSelect('sel-wr', LOADED_LISTS.wr);
-    fillSelect('sel-te', LOADED_LISTS.te);
-    fillSelect('sel-k',  LOADED_LISTS.k);
+
+    // QB/K = starters-only + Other… ; RB/WR/TE = full list + Other…
+    const qbList = startersOnly(LOADED_LISTS.qb || [], 'QB');
+    const kList  = startersOnly(LOADED_LISTS.k  || [], 'K');
+
+    fillSelect('sel-qb', qbList);
+    fillSelect('sel-rb', withOther(LOADED_LISTS.rb, 'RB'));
+    fillSelect('sel-wr', withOther(LOADED_LISTS.wr, 'WR'));
+    fillSelect('sel-te', withOther(LOADED_LISTS.te, 'TE'));
+    fillSelect('sel-k',  kList);
+
+    // Wire the revealers for all five
+    wireOtherToggle('sel-qb','qb-other-wrap','qb-other');
+    wireOtherToggle('sel-rb','rb-other-wrap','rb-other');
+    wireOtherToggle('sel-wr','wr-other-wrap','wr-other');
+    wireOtherToggle('sel-te','te-other-wrap','te-other');
+    wireOtherToggle('sel-k','k-other-wrap','k-other');
   }
 
   /* =========================
@@ -473,6 +582,7 @@
      SUBMIT HANDLER
      - Instant green + remember
      - POST to Apps Script
+     - Replace 'Other…' with write-in values
      - Sync from CSV
      ========================= */
   const form = document.getElementById('dud-form');
@@ -492,13 +602,26 @@
 
     try{
       const fd = new FormData(form);
+
+      // Replace any 'other' selections with the write-in text
+      const map = [
+        ['qb','qb-other'],
+        ['rb','rb-other'],
+        ['wr','wr-other'],
+        ['te','te-other'],
+        ['k','k-other'],
+      ];
+      for (const [field, inputId] of map){
+        if (fd.get(field) === 'other') {
+          fd.set(field, (document.getElementById(inputId)?.value || '').trim());
+        }
+      }
+
       await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
       statusEl.textContent = 'Submitted! (check sheet)';
 
       form.reset();
       await paintDropdowns();                // restore placeholders
-
-      // Try to sync from the sheet right away
       try { await refreshCheckins(); } catch {}
     }catch{
       statusEl.textContent = 'Error. Try again or contact the commish.';
