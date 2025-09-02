@@ -123,11 +123,6 @@
           <label>K <select name="k" id="sel-k"></select></label>
         </div>
 
-        <div class="full controls">
-          <button type="submit">Submit picks</button>
-          <span id="form-status" class="note"></span>
-        </div>
-
         <!-- inside <form id="dud-form" class="compact"> ... -->
 <div class="full controls">
   <button type="submit">Submit picks</button>
@@ -173,21 +168,6 @@
   </div>
 </section>
 
-
-  <section style="margin-top:18px">
-    <div class="controls">
-      <button id="toggle-standings" type="button">Show standings</button>
-      <span class="note">Table is hidden until you choose to reveal it.</span>
-    </div>
-    <div id="standings-wrap" class="card" style="overflow:auto">
-      <table id="standings">
-        <thead><tr>
-          <th>#</th><th>Name</th><th>Total</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>K</th>
-        </tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
 
   <section id="about" style="margin:18px 0 36px">
     <h2>About</h2>
@@ -543,9 +523,6 @@ function renderStandings(rows){
   applyRevealGate?.();
 })();
 
-
-    applyRevealGate(); // show note or standings based on current time
-
     // Re-check the sheet every 60 seconds
 setInterval(() => { refreshCheckins(); }, 60000);
 
@@ -555,6 +532,7 @@ setInterval(() => { refreshCheckins(); }, 60000);
   
 </body>
 </html>
+
 
 
 
