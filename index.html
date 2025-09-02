@@ -408,12 +408,17 @@
     renderChips();              // gray chips first
     refreshCheckins();          // green for already-submitted (needs CSV_URL or CORS-friendly GET)
   })();
+
+    // Re-check the sheet every 60 seconds
+setInterval(() => { refreshCheckins(); }, 60000);
+
 </script>
 
 
   
 </body>
 </html>
+
 
 
 
