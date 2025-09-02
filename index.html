@@ -36,13 +36,27 @@
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .chip{padding:.45rem .7rem;border-radius:999px;background:#eef2ff;color:#1e293b;border:1px solid #c7d2fe;font-weight:600;font-size:.9rem}
     .chip.submitted{background:#ecfdf5;border-color:#86efac;color:#166534}
-    .chip.submitted::after{content:" ✓";color:var(--ok);font-weight:900}
+    .chip.submitted::after{content:" ✓";color:#16a34a;font-weight:900}
 
     #standings-wrap{display:none}
     table{width:100%;border-collapse:collapse}
     th,td{padding:.55rem;border-bottom:1px solid #e5e7eb;text-align:left}
     th{color:#374151}
     .controls{display:flex;gap:10px;align-items:center;margin:.5rem 0}
+
+    /* Custom autocomplete dropdown */
+    .ac-wrap{position:relative}
+    .ac-list{
+      position:absolute; z-index:10; left:0; right:0; top:100%;
+      background:#fff; border:1px solid #d1d5db; border-radius:8px; margin-top:4px;
+      box-shadow:0 8px 24px rgba(0,0,0,.08); max-height:220px; overflow:auto; display:none;
+    }
+    .ac-item{padding:.5rem .7rem; cursor:pointer}
+    .ac-item:hover, .ac-item.active{background:#f1f5f9}
+    .statusbar{margin:10px 0 0;color:#64748b;font-size:.9rem}
+    .statusbar.ok{color:#0f766e}
+    .statusbar.warn{color:#b45309}
+
     @media (max-width:700px){.featured{grid-template-columns:1fr 1fr} form.compact{grid-template-columns:1fr}}
   </style>
 </head>
@@ -51,7 +65,8 @@
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:16px">
     <div>
       <h1>Dud Football</h1>
-      <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins.</div>
+      <div class="note">Pick one QB, RB, WR, TE, K. Lowest total wins. +15 for a no-stats player.</div>
+      <div id="players-status" class="statusbar">Loading player lists…</div>
     </div>
     <nav>
       <a href="#home">Home</a>
@@ -65,25 +80,22 @@
   <section class="card">
     <h2>Featured Games</h2>
     <div class="featured" id="featured">
-  <img src="tnf_cow_eag.jpg" alt="TNF: Cowboys @ Eagles">
-  <div class="slot">  <img src="fnf_ke_lac.jpg" alt="FNF: Chiefs @ Chargers">
-</div>
-  <div class="slot">  <img src="sfb_gb_det.jpg" alt="SDF: Lions @ Packers">
-</div>
-  <div class="slot">  <img src="mnf_chi_min.jpg" alt="MNF: Vikings @ Bears">
-</div>
-</div>
+      <img src="tnf_cow_eag.jpg" alt="TNF: Cowboys @ Eagles">
+      <div class="slot">Feature 2</div>
+      <div class="slot">Feature 3</div>
+      <div class="slot">Feature 4</div>
+    </div>
   </section>
 
   <section style="margin-top:18px">
     <h2>Submit your picks</h2>
     <div class="card">
       <form id="dud-form" class="compact">
-        <div class="full">
+        <div class="full ac-wrap">
           <label>Name
-            <input type="text" name="name" id="name-input" list="roster-list" autocomplete="off" required />
-            <datalist id="roster-list"></datalist>
+            <input type="text" name="name" id="name-input" autocomplete="off" required />
           </label>
+          <div id="ac-list" class="ac-list"></div>
         </div>
 
         <label>QB <select name="qb" id="sel-qb"></select></label>
@@ -142,7 +154,7 @@
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv'
 
-  // === Your league roster (used for chips + name autocomplete) ===
+  // === League roster (for autocomplete + chips) ===
   const ROSTER = [
     'David Cook',
     'Al Kremer','Adam McCloud','Chad Neff','Chris Gotsch','Dan Adams','Devin Hester',
@@ -151,30 +163,216 @@
     'Ryan Brunswick','Ryan Slattery','Tim Garis','Will Peterson'
   ];
 
-  // ---------- load players.json ----------
+  // ---------- fallback default lists (used only if players.json fails) ----------
+  const FALLBACK_LISTS = {
+    qb: ['— Select QB —','Zach Wilson','Mac Jones','Desmond Ridder','Justin Fields'],
+    rb: ['— Select RB —','AJ Dillon','Cam Akers','Najee Harris','Tyler Allgeier'],
+    wr: ['— Select WR —','Allen Robinson','Chase Claypool','Kadarius Toney','DJ Chark'],
+    te: ['— Select TE —','Mike Gesicki','Kyle Pitts','Cole Kmet','Tyler Conklin'],
+    k:  ['— Select K —','Eddy Piñeiro','Cade York','Greg Zuerlein','Younghoe Koo']
+  };
+
+  // ---------- load players.json with robust fallback ----------
   let LOADED_LISTS = null;
-  let CURRENT_WEEK = null;
+  function setPlayersStatus(text, cls){
+    const el = document.getElementById('players-status');
+    el.textContent = text;
+    el.className = 'statusbar ' + (cls||'');
+  }
 
   async function loadPlayersJson(){
-    try{
-      const qp = new URLSearchParams(location.search);
-      const weekOverride = qp.get('week');
+    const candidates = [
+      'players.json?v=' + Date.now(),
+      location.origin + location.pathname.replace(/index\.html?$/,'') + 'players.json?v=' + Date.now()
+    ];
+    for (const url of candidates){
+      try{
+        const res = await fetch(url, {cache:'no-store'});
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
 
-      const res = await fetch('players.json?v=' + Date.now(), {cache:'no-store'});
-      const data = await res.json();
+        const pos = data.positions || {};
+        const withPH = (arr, label)=> ['— Select ' + label + ' —', ...(arr||[])];
+        LOADED_LISTS = {
+          qb: withPH(pos.qb, 'QB'),
+          rb: withPH(pos.rb, 'RB'),
+          wr: withPH(pos.wr, 'WR'),
+          te: withPH(pos.te, 'TE'),
+          k:  withPH(pos.k,  'K')
+        };
+        setPlayersStatus('Loaded players from players.json', 'ok');
+        return;
+      }catch(e){ /* try next candidate */ }
+    }
+    LOADED_LISTS = FALLBACK_LISTS;
+    setPlayersStatus('Using built-in player lists (players.json not found or invalid).', 'warn');
+  }
 
-      CURRENT_WEEK = weekOverride || data.currentWeek || null;
+  function fillSelect(id, arr){
+    const el = document.getElementById(id);
+    el.innerHTML = arr.map((name,i)=>`<option value="${i===0?'':name}" ${i===0?'disabled selected':''}>${name}</option>`).join('');
+  }
 
-      let pos = data.positions || {};
-      if (data.weeks && CURRENT_WEEK && data.weeks[String(CURRENT_WEEK)]?.positions){
-        pos = data.weeks[String(CURRENT_WEEK)].positions;
+  async function paintDropdowns(){
+    if (!LOADED_LISTS) await loadPlayersJson();
+    fillSelect('sel-qb', LOADED_LISTS.qb);
+    fillSelect('sel-rb', LOADED_LISTS.rb);
+    fillSelect('sel-wr', LOADED_LISTS.wr);
+    fillSelect('sel-te', LOADED_LISTS.te);
+    fillSelect('sel-k',  LOADED_LISTS.k);
+  }
+
+  // ---------- custom autocomplete for Name ----------
+  const nameInput = document.getElementById('name-input');
+  const acList = document.getElementById('ac-list');
+  let acIndex = -1; // keyboard selection index
+
+  function showSuggestions(items){
+    if (!items.length){ acList.style.display='none'; return; }
+    acList.innerHTML = items.map((n,i)=>`<div class="ac-item${i===0?' active':''}" data-name="${n}">${n}</div>`).join('');
+    acList.style.display = 'block';
+    acIndex = 0;
+  }
+  function hideSuggestions(){ acList.style.display='none'; acIndex=-1; }
+  function currentSuggestions(){
+    return Array.from(acList.querySelectorAll('.ac-item'));
+  }
+
+  nameInput.addEventListener('input', () => {
+    const q = nameInput.value.trim().toLowerCase();
+    if (!q){ hideSuggestions(); return; }
+    const hits = ROSTER.filter(n => n.toLowerCase().includes(q)).slice(0, 8);
+    showSuggestions(hits);
+  });
+  nameInput.addEventListener('focus', () => {
+    const q = nameInput.value.trim().toLowerCase();
+    const hits = q ? ROSTER.filter(n => n.toLowerCase().includes(q)).slice(0,8) : ROSTER.slice(0,8);
+    showSuggestions(hits);
+  });
+  document.addEventListener('click', (e)=>{
+    if (!e.target.closest('.ac-wrap')) hideSuggestions();
+  });
+  acList.addEventListener('click', (e)=>{
+    const it = e.target.closest('.ac-item'); if (!it) return;
+    nameInput.value = it.dataset.name;
+    hideSuggestions();
+  });
+  nameInput.addEventListener('keydown', (e)=>{
+    const items = currentSuggestions(); if (!items.length) return;
+    if (e.key==='ArrowDown'){ e.preventDefault(); acIndex = Math.min(acIndex+1, items.length-1); items.forEach((el,i)=>el.classList.toggle('active', i===acIndex)); }
+    if (e.key==='ArrowUp'){ e.preventDefault(); acIndex = Math.max(acIndex-1, 0); items.forEach((el,i)=>el.classList.toggle('active', i===acIndex)); }
+    if (e.key==='Enter'){ if (acIndex>=0){ e.preventDefault(); nameInput.value = items[acIndex].dataset.name; hideSuggestions(); } }
+    if (e.key==='Escape'){ hideSuggestions(); }
+  });
+
+  // ---------- roster chips ----------
+  function renderChips(submittedSet=new Set()){
+    const box = document.getElementById('chips');
+    box.innerHTML = ROSTER.map(n=>{
+      const submitted = submittedSet.has(n.toLowerCase().trim());
+      return `<span class="chip ${submitted?'submitted':''}">${n}</span>`;
+    }).join('');
+  }
+  function markChipAsSubmitted(name){
+    if (!name) return;
+    const target = name.toLowerCase().trim();
+    const container = document.getElementById('chips');
+    [...container.querySelectorAll('.chip')].forEach(chip=>{
+      if (chip.textContent.toLowerCase().trim() === target){
+        chip.classList.add('submitted');
       }
+    });
+  }
 
-      const withPlaceholder = (arr, label)=> ['— Select ' + label + ' —', ...(arr || [])];
+  // ---------- standings + check-ins ----------
+  async function fetchStandings(){
+    try{
+      if (CSV_URL){
+        const res = await fetch(CSV_URL, {cache:'no-store'}); if(!res.ok) throw 0;
+        const text = await res.text();
+        const lines = text.trim().split(/\r?\n/);
+        const hdr = lines[0].split(',');
+        const idx = (h)=>hdr.indexOf(h);
+        return lines.slice(1).map(line=>{
+          const cols = line.split(',');
+          return {
+            name: cols[idx('name')] || '',
+            total: cols[idx('total')] || '',
+            qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
+            te: cols[idx('te')]||'', k: cols[idx('k')]||''
+          };
+        }).filter(r=>r.name);
+      }else{
+        const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
+        return await res.json();
+      }
+    }catch(e){
+      return []; // fail-soft if CORS blocks
+    }
+  }
+  function renderStandings(rows){
+    const tbody = document.querySelector('#standings tbody');
+    tbody.innerHTML = rows.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td><td>${r.name||''}</td><td><strong>${r.total||''}</strong></td>
+        <td>${r.qb||''}</td><td>${r.rb||''}</td><td>${r.wr||''}</td><td>${r.te||''}</td><td>${r.k||''}</td>
+      </tr>`).join('');
+  }
+  async function refreshCheckins(){
+    const rows = await fetchStandings();
+    const submitted = new Set(rows.map(r=>(r.name||'').toLowerCase().trim()));
+    renderChips(submitted);
+    return rows;
+  }
 
+  // ---------- submit ----------
+  const form = document.getElementById('dud-form');
+  const statusEl = document.getElementById('form-status');
+  form?.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    statusEl.textContent = 'Submitting…';
+    try{
+      const fd = new FormData(form);
+      const nameJustSubmitted = (nameInput.value || '').trim();
 
+      await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
+      statusEl.textContent = 'Submitted! (check sheet)';
 
+      form.reset();
+      await paintDropdowns();      // keep placeholders
+      markChipAsSubmitted(nameJustSubmitted); // instant green
+      try { await refreshCheckins(); } catch {}
+    }catch{
+      statusEl.textContent = 'Error. Try again or contact the commish.';
+    }
+  });
 
+  // ---------- manual standings reveal ----------
+  const btnToggle = document.getElementById('toggle-standings');
+  const wrapStandings = document.getElementById('standings-wrap');
+  let standingsLoaded = false;
+  btnToggle.addEventListener('click', async ()=>{
+    const showing = wrapStandings.style.display === 'block';
+    if (showing){
+      wrapStandings.style.display = 'none';
+      btnToggle.textContent = 'Show standings';
+      return;
+    }
+    wrapStandings.style.display = 'block';
+    btnToggle.textContent = 'Hide standings';
+    if (!standingsLoaded){
+      const rows = await fetchStandings();
+      renderStandings(rows);
+      standingsLoaded = true;
+    }
+  });
 
-
-
+  // ---------- boot ----------
+  (async function init(){
+    await paintDropdowns();     // loads players.json or fallback
+    renderChips();              // gray chips first
+    refreshCheckins();          // green for already-submitted (needs CSV_URL or CORS-friendly GET)
+  })();
+</script>
+</body>
+</html>
