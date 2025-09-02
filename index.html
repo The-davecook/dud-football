@@ -78,7 +78,7 @@
 
 <main class="wrap" id="home" style="padding-top:16px">
   <section class="card">
-    <h2>Featured Games</h2>
+    <h2>Week 1 Games</h2>
     <div class="featured" id="featured">
   <div class="slot"><img src="tnf_cow_eag.jpg" alt="TNF: Cowboys @ Eagles"></div>
   <div class="slot"><img src="fnf_ke_lac.jpg" alt="Thursday Night Football"></div>
@@ -168,6 +168,8 @@
 */
 const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '1');
 
+const FORCE_REVEAL = new URLSearchParams(location.search).has('reveal');
+
 /* Per-week CSV links (use your Publish-to-web “output=csv” links for each week).
    For now I mapped week 1 to your existing CSV. Fill in the others later. */
 const WEEK_CSV = {
@@ -195,12 +197,12 @@ const REVEAL_SCHEDULE = {
 
 // Determine if standings should be revealed now
 function isRevealedNow(){
+  if (FORCE_REVEAL) return true;             // <-- test override
   const iso = REVEAL_SCHEDULE[ACTIVE_WEEK];
-  if (!iso) return false; // if not configured, keep hidden
-  const now = Date.now();
-  const unlock = new Date(iso).getTime();
-  return now >= unlock;
+  if (!iso) return false;
+  return Date.now() >= new Date(iso).getTime();
 }
+
 
 // Swap UI at the right time; auto-refresh when it flips
 async function applyRevealGate(){
@@ -475,6 +477,7 @@ setInterval(() => { refreshCheckins(); }, 60000);
   
 </body>
 </html>
+
 
 
 
