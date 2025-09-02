@@ -58,6 +58,18 @@
     .statusbar.warn{color:#b45309}
 
     @media (max-width:700px){.featured{grid-template-columns:1fr 1fr} form.compact{grid-template-columns:1fr}}
+
+    /* two-column section for form + check-in */
+.twocol {
+  display: grid;
+  grid-template-columns: 2fr 1fr;  /* form wider than chips */
+  gap: 16px;
+}
+
+@media (max-width: 900px){
+  .twocol { grid-template-columns: 1fr; } /* stack on mobile */
+}
+
   </style>
 </head>
 <body>
@@ -76,6 +88,8 @@
   </div>
 </header>
 
+<!-- Featured Games -->
+
 <main class="wrap" id="home" style="padding-top:16px">
   <section class="card">
     <h2>Week 1 Games</h2>
@@ -87,7 +101,10 @@
 </div>
   </section>
 
-  <section style="margin-top:18px">
+  <!-- 2-column: form (left) + player check-in (right) -->
+
+  <section class="twocol" style="margin-top:18px">
+  <div>
     <h2>Submit your picks</h2>
     <div class="card">
       <form id="dud-form" class="compact">
@@ -106,6 +123,29 @@
           <label>K <select name="k" id="sel-k"></select></label>
         </div>
 
+        <div class="full controls">
+          <button type="submit">Submit picks</button>
+          <span id="form-status" class="note"></span>
+        </div>
+
+        <!-- optional: record the week number with each submission -->
+        <input type="hidden" name="week" id="week-field">
+      </form>
+    </div>
+  </div>
+
+  <aside>
+    <h2>Player check-in</h2>
+    <div class="card">
+      <div class="note">Green = submitted this week</div>
+      <div id="chips" class="chips"></div>
+    </div>
+  </aside>
+</section>
+
+
+<!-- Full-width standings (auto-reveals at noon) -->
+
     <section id="standings-section" style="margin-top:18px">
   <div id="reveal-note" class="note">
     Picks will be revealed at Noon Central on Sunday.
@@ -120,16 +160,6 @@
     </table>
   </div>
 </section>
-
-
-
-  <section id="week1" style="margin-top:18px">
-    <h2>Player check-in</h2>
-    <div class="card">
-      <div class="note">Green = submitted this week</div>
-      <div id="chips" class="chips"></div>
-    </div>
-  </section>
 
   <section style="margin-top:18px">
     <div class="controls">
@@ -477,6 +507,7 @@ setInterval(() => { refreshCheckins(); }, 60000);
   
 </body>
 </html>
+
 
 
 
