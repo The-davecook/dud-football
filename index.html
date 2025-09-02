@@ -264,8 +264,11 @@ header{
     <div>
       <h1 class="brand-title">Dud Football</h1>
       <p id="tagline" class="tagline">
-        Pick one QB, RB, WR, TE, K. Lowest total wins. <strong>+15</strong> for a no-stats player.
-      </p>
+  Pick one QB, RB, WR, TE, K. Lowest total wins. <strong>+15</strong> for a no-stats player.
+</p>
+
+<div id="players-status" class="statusbar" style="display:none"></div>
+
     </div>
     <nav>
       <a href="#home">Home</a>
@@ -596,11 +599,14 @@ function setRandomTagline() {
     k:  ['— Select K —','Eddy Piñeiro','Cade York','Greg Zuerlein','Younghoe Koo']
   };
   let LOADED_LISTS = null;
-  function setPlayersStatus(text, cls){
-    const el = document.getElementById('players-status');
-    el.textContent = text;
-    el.className = 'statusbar ' + (cls||'');
-  }
+ function setPlayersStatus(text, cls){
+  const el = document.getElementById('players-status');
+  if (!el) return;               // <-- guard so no element = no crash
+  el.style.display = 'block';
+  el.textContent = text;
+  el.className = 'statusbar ' + (cls || '');
+}
+
   async function loadPlayersJson(){
     const candidates = [
       'players.json?v=' + Date.now(),
@@ -924,6 +930,7 @@ function setRandomTagline() {
 </script>
 </body>
 </html>
+
 
 
 
