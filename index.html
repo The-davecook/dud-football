@@ -478,10 +478,11 @@ function setRandomTagline() {
     'Points are bad. Be good at bad.'
   ];
   const el = document.getElementById('tagline');
-  if (el) el.textContent = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
-    el.innerHTML = t; // use innerHTML so <s> renders
-
+  if (!el) return;
+  const t = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
+  el.innerHTML = t;            // use innerHTML so <s> renders
 }
+
 
   
   /* =========================
@@ -939,6 +940,7 @@ function setRandomTagline() {
 </script>
 </body>
 </html>
+
 
 
 
