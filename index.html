@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <title>Dud Football</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- ========== STYLES ========== -->
   <style>
     :root{
       --bg:#f8fbfd; --text:#111; --link:#0366d6; --card:#fff; --muted:#6b7280;
@@ -24,8 +26,9 @@
       aspect-ratio:16/9;border:1px dashed #cbd5e1;border-radius:10px;
       display:flex;align-items:center;justify-content:center;color:#94a3b8;background:#fff;
     }
-    .featured img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+    .featured .slot img{width:100%;height:100%;object-fit:cover;border-radius:10px}
 
+    /* Compact form grid */
     form.compact{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     form.compact .full{grid-column:1 / -1}
     label{font-weight:600;font-size:.95rem}
@@ -33,18 +36,25 @@
     button{padding:.6rem 1rem;border:0;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
     #form-status{margin-left:.6rem;color:var(--muted)}
 
+    /* Player chips */
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .chip{padding:.45rem .7rem;border-radius:999px;background:#eef2ff;color:#1e293b;border:1px solid #c7d2fe;font-weight:600;font-size:.9rem}
     .chip.submitted{background:#ecfdf5;border-color:#86efac;color:#166534}
     .chip.submitted::after{content:" ✓";color:#16a34a;font-weight:900}
 
+    /* Standings table */
     #standings-wrap{display:none}
     table{width:100%;border-collapse:collapse}
     th,td{padding:.55rem;border-bottom:1px solid #e5e7eb;text-align:left}
     th{color:#374151}
-    .controls{display:flex;gap:10px;align-items:center;margin:.5rem 0}
 
-    /* Custom autocomplete dropdown */
+    /* Controls + status */
+    .controls{display:flex;gap:10px;align-items:center;margin:.5rem 0}
+    .statusbar{margin:10px 0 0;color:#64748b;font-size:.9rem}
+    .statusbar.ok{color:#0f766e}
+    .statusbar.warn{color:#b45309}
+
+    /* Custom autocomplete dropdown for Name */
     .ac-wrap{position:relative}
     .ac-list{
       position:absolute; z-index:10; left:0; right:0; top:100%;
@@ -53,23 +63,11 @@
     }
     .ac-item{padding:.5rem .7rem; cursor:pointer}
     .ac-item:hover, .ac-item.active{background:#f1f5f9}
-    .statusbar{margin:10px 0 0;color:#64748b;font-size:.9rem}
-    .statusbar.ok{color:#0f766e}
-    .statusbar.warn{color:#b45309}
 
-    @media (max-width:700px){.featured{grid-template-columns:1fr 1fr} form.compact{grid-template-columns:1fr}}
-
-    /* two-column section for form + check-in */
-.twocol {
-  display: grid;
-  grid-template-columns: 2fr 1fr;  /* form wider than chips */
-  gap: 16px;
-}
-
-@media (max-width: 900px){
-  .twocol { grid-template-columns: 1fr; } /* stack on mobile */
-}
-
+    /* Two-column layout: form (2/3) + chips (1/3) on desktop; stacked on mobile */
+    .twocol { display:grid; grid-template-columns: 2fr 1fr; gap:16px; }
+    @media (max-width: 900px){ .twocol { grid-template-columns: 1fr; } }
+    @media (max-width:700px){ .featured{grid-template-columns:1fr 1fr} form.compact{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
@@ -88,167 +86,160 @@
   </div>
 </header>
 
-<!-- Featured Games -->
-
 <main class="wrap" id="home" style="padding-top:16px">
+  <!-- ========== FEATURED GAMES ========== -->
   <section class="card">
     <h2>Week 1 Games</h2>
     <div class="featured" id="featured">
-  <div class="slot"><img src="tnf_cow_eag.jpg" alt="TNF: Cowboys @ Eagles"></div>
-  <div class="slot"><img src="fnf_ke_lac.jpg" alt="Thursday Night Football"></div>
-  <div class="slot"><img src="sfb_gb_det.jpg" alt="Sunday Football"></div>
-  <div class="slot"><img src="mnf_chi_min.jpg" alt="Monday Night Football"></div>
-</div>
+      <div class="slot"><img src="tnf_cow_eag.jpg" alt="TNF: Cowboys @ Eagles"></div>
+      <div class="slot"><img src="fnf_ke_lac.jpg" alt="Thursday Night Football"></div>
+      <div class="slot"><img src="sfb_gb_det.jpg" alt="Sunday Football"></div>
+      <div class="slot"><img src="mnf_chi_min.jpg" alt="Monday Night Football"></div>
+    </div>
   </section>
 
-  <!-- 2-column: form (left) + player check-in (right) -->
-
+  <!-- ========== TWO-COLUMN: FORM + CHECK-IN ========== -->
   <section class="twocol" style="margin-top:18px">
-  <div>
-    <h2>Submit your picks</h2>
-    <div class="card">
-      <form id="dud-form" class="compact">
-        <div class="full ac-wrap">
-          <label>Name
-            <input type="text" name="name" id="name-input" autocomplete="off" required />
-          </label>
-          <div id="ac-list" class="ac-list"></div>
-        </div>
+    <!-- Left: Submit picks -->
+    <div>
+      <h2>Submit your picks</h2>
+      <div class="card">
+        <form id="dud-form" class="compact">
+          <!-- Name with custom autocomplete -->
+          <div class="full ac-wrap">
+            <label>Name
+              <input type="text" name="name" id="name-input" autocomplete="off" required />
+            </label>
+            <div id="ac-list" class="ac-list"></div>
+          </div>
 
-        <label>QB <select name="qb" id="sel-qb"></select></label>
-        <label>RB <select name="rb" id="sel-rb"></select></label>
-        <label>WR <select name="wr" id="sel-wr"></select></label>
-        <label>TE <select name="te" id="sel-te"></select></label>
-        <div class="full">
-          <label>K <select name="k" id="sel-k"></select></label>
-        </div>
+          <!-- Position dropdowns (populated from players.json or fallback) -->
+          <label>QB <select name="qb" id="sel-qb"></select></label>
+          <label>RB <select name="rb" id="sel-rb"></select></label>
+          <label>WR <select name="wr" id="sel-wr"></select></label>
+          <label>TE <select name="te" id="sel-te"></select></label>
+          <div class="full">
+            <label>K <select name="k" id="sel-k"></select></label>
+          </div>
 
-        <!-- inside <form id="dud-form" class="compact"> ... -->
-<div class="full controls">
-  <button type="submit">Submit picks</button>
-  <span id="form-status" class="note"></span>
-</div>
+          <!-- Submit controls -->
+          <div class="full controls">
+            <button type="submit">Submit picks</button>
+            <span id="form-status" class="note"></span>
+          </div>
 
-<!-- ✅ record the week number with each submission -->
-<input type="hidden" name="week" id="week-field" />
-
-      </form>
+          <!-- Record the week number with each submission -->
+          <input type="hidden" name="week" id="week-field" />
+        </form>
+      </div>
     </div>
-  </div>
 
-  <aside>
-    <h2>Player check-in</h2>
-    <div class="card">
-      <div class="note">Green = submitted this week</div>
-      <div id="chips" class="chips"></div>
+    <!-- Right: Player check-ins -->
+    <aside>
+      <h2>Player check-in</h2>
+      <div class="card">
+        <div class="note">Green = submitted this week</div>
+        <div id="chips" class="chips"></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ========== STANDINGS (AUTO-REVEAL AT NOON CENTRAL) ========== -->
+  <section id="standings-section" style="margin-top:18px">
+    <div id="reveal-note" class="note">
+      Picks will be revealed at Noon Central on Sunday.
     </div>
-  </aside>
-</section>
 
+    <div id="standings-wrap" class="card" style="overflow:auto; display:none">
+      <table id="standings">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Total</th>
+          <th>QB</th><th>QB Pts</th>
+          <th>RB</th><th>RB Pts</th>
+          <th>WR</th><th>WR Pts</th>
+          <th>TE</th><th>TE Pts</th>
+          <th>K</th><th>K Pts</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
 
-<!-- Full-width standings (auto-reveals at noon) -->
-
-<section id="standings-section" style="margin-top:18px">
-  <div id="reveal-note" class="note">
-    Picks will be revealed at Noon Central on Sunday.
-  </div>
-
-  <div id="standings-wrap" class="card" style="overflow:auto; display:none">
-    <table id="standings">
-      <thead><tr>
-        <th>#</th><th>Name</th><th>Total</th>
-        <th>QB</th><th>QB Pts</th>
-        <th>RB</th><th>RB Pts</th>
-        <th>WR</th><th>WR Pts</th>
-        <th>TE</th><th>TE Pts</th>
-        <th>K</th><th>K Pts</th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</section>
-
-
+  <!-- About -->
   <section id="about" style="margin:18px 0 36px">
     <h2>About</h2>
     <div class="card">
-     Dud Football.  Providing 4th quarter mayhem to Jay Muench since 2008.
+    Dud Football. Providing 4th Quarter mayhem to Jay Muench since 2008.
     </div>
   </section>
 </main>
 
-  <script>
-  /* === CONFIG === */
+<!-- ========== SCRIPTS ========== -->
+<script>
+  /* =========================
+     CONFIG: back-end endpoints
+     ========================= */
+ 
   const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbzyyG10SKxPbhrLEoGlTvLUb2DoMVKurSC9KRRwZCBYYRzvHaAzOcH3H1_UQzhjt-V1/exec';
   const STANDINGS_URL = SCRIPT_URL + '?view=standings';
 
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv';
 
-    /* === WEEK & REVEAL SCHEDULE ===
-   - ACTIVE_WEEK: controls which week's CSV + reveal time to use.
-   - You can change it via URL too, e.g. ?week=5
-*/
-const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '1');
 
-const FORCE_REVEAL = new URLSearchParams(location.search).has('reveal');
+  /* =========================
+     WEEK & REVEAL SCHEDULE
+     - Change ?week= in URL to switch (e.g., ?week=5)
+     - FORCE_REVEAL with ?reveal=1 to test
+     ========================= */
+  const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '1');
+  const FORCE_REVEAL = new URLSearchParams(location.search).has('reveal');
 
-/* Per-week CSV links (use your Publish-to-web “output=csv” links for each week).
-   For now I mapped week 1 to your existing CSV. Fill in the others later. */
-const WEEK_CSV = {
-  '1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv',
-  '5': '',  // TODO: paste week 5 CSV publish link
-  '9': '',  // TODO
-  '13': '', // TODO
-  '17': ''  // TODO
-};
+  // Per-week CSV links (Publish to web → that week's "submissions" → CSV)
+  const WEEK_CSV = {
+    '1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv',
+    '5': '',  // TODO: paste week 5 CSV
+    '9': '',  // TODO
+    '13':'',  // TODO
+    '17':''   // TODO
+  };
+  function csvUrl(){ return WEEK_CSV[ACTIVE_WEEK] || CSV_URL || ''; }
 
-// Helper to pick the correct CSV for the active week (falls back to CSV_URL if set)
-function csvUrl(){
-  return WEEK_CSV[ACTIVE_WEEK] || CSV_URL || '';
-}
-
-/* Reveal times for America/Chicago (Central). These ISO strings include the offset,
-   so it works worldwide. Edit dates/times as needed. */
-const REVEAL_SCHEDULE = {
-  '1':  '2025-09-07T12:00:00-05:00', // Week 1 (CDT)
-  '5':  '2025-10-05T12:00:00-05:00', // Week 5 (CDT)
-  '9':  '2025-11-02T12:00:00-06:00', // Week 9 (CST starts Nov 2, 2025)
-  '13': '2025-11-30T12:00:00-06:00', // Week 13 (CST)
-  '17': '2025-12-28T12:00:00-06:00'  // Week 17 (CST)
-};
-
-// Determine if standings should be revealed now
-function isRevealedNow(){
-  if (FORCE_REVEAL) return true;             // <-- test override
-  const iso = REVEAL_SCHEDULE[ACTIVE_WEEK];
-  if (!iso) return false;
-  return Date.now() >= new Date(iso).getTime();
-}
-
-
-// Swap UI at the right time; auto-refresh when it flips
-async function applyRevealGate(){
-  const note = document.getElementById('reveal-note');
-  const tableWrap = document.getElementById('standings-wrap');
-
-  if (isRevealedNow()){
-    note.style.display = 'none';
-    tableWrap.style.display = 'block';
-    // First time we reveal, load standings
-    const rows = await fetchStandings();
-    renderStandings(rows);
-  }else{
-    note.style.display = 'block';
-    tableWrap.style.display = 'none';
+  // Noon Central (America/Chicago) for each game week (update dates per season)
+  const REVEAL_SCHEDULE = {
+    '1':  '2025-09-07T12:00:00-05:00', // Week 1 (CDT)
+    '5':  '2025-10-05T12:00:00-05:00', // Week 5 (CDT)
+    '9':  '2025-11-02T12:00:00-06:00', // Week 9 (CST starts)
+    '13': '2025-11-30T12:00:00-06:00', // Week 13
+    '17': '2025-12-28T12:00:00-06:00'  // Week 17
+  };
+  function isRevealedNow(){
+    if (FORCE_REVEAL) return true;           // test override with ?reveal=1
+    const iso = REVEAL_SCHEDULE[ACTIVE_WEEK];
+    if (!iso) return false;
+    return Date.now() >= new Date(iso).getTime();
   }
-}
+  async function applyRevealGate(){
+    const note = document.getElementById('reveal-note');
+    const tableWrap = document.getElementById('standings-wrap');
+    if (isRevealedNow()){
+      note.style.display = 'none';
+      tableWrap.style.display = 'block';
+      // load standings once visible
+      const rows = await fetchStandings();
+      renderStandings(rows);
+    }else{
+      note.style.display = 'block';
+      tableWrap.style.display = 'none';
+    }
+  }
+  // Re-check every 30s to flip exactly at reveal time
+  setInterval(applyRevealGate, 30000);
 
-// Check every 30s to flip from hidden → revealed at the exact moment
-setInterval(applyRevealGate, 30000);
-
-    
-  /* Remember the last name typed so players don't retype it every week */
+  /* =========================
+     QUALITY OF LIFE
+     - Persist last typed name
+     ========================= */
   (function persistName() {
     const saved = localStorage.getItem('df_name') || '';
     const input = document.getElementById('name-input');
@@ -258,14 +249,11 @@ setInterval(applyRevealGate, 30000);
     });
   })();
 
+  /* =========================
+     VALIDATION & NORMALIZATION
+     ========================= */
   function validatePicks() {
-    const need = [
-      ['sel-qb', 'QB'],
-      ['sel-rb', 'RB'],
-      ['sel-wr', 'WR'],
-      ['sel-te', 'TE'],
-      ['sel-k',  'K']
-    ];
+    const need = [['sel-qb','QB'],['sel-rb','RB'],['sel-wr','WR'],['sel-te','TE'],['sel-k','K']];
     for (const [id,label] of need) {
       const v = document.getElementById(id)?.value || '';
       if (!v) return `Please select a ${label}.`;
@@ -274,8 +262,11 @@ setInterval(applyRevealGate, 30000);
     if (!nm) return 'Please enter your name.';
     return '';
   }
+  function norm(s){ return (s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
 
-  // === League roster (for autocomplete + chips) ===
+  /* =========================
+     ROSTER (chips + autocomplete)
+     ========================= */
   const ROSTER = [
     'David Cook',
     'Al Kremer','Adam McCloud','Chad Neff','Chris Gotsch','Dan Adams','Devin Hester',
@@ -284,7 +275,10 @@ setInterval(applyRevealGate, 30000);
     'Ryan Brunswick','Ryan Slattery','Tim Garis','Will Peterson'
   ];
 
-  // ---------- fallback default lists (used only if players.json fails) ----------
+  /* =========================
+     PLAYERS LISTS (dropdowns)
+     - Loads players.json; falls back if missing
+     ========================= */
   const FALLBACK_LISTS = {
     qb: ['— Select QB —','Zach Wilson','Mac Jones','Desmond Ridder','Justin Fields'],
     rb: ['— Select RB —','AJ Dillon','Cam Akers','Najee Harris','Tyler Allgeier'],
@@ -292,15 +286,12 @@ setInterval(applyRevealGate, 30000);
     te: ['— Select TE —','Mike Gesicki','Kyle Pitts','Cole Kmet','Tyler Conklin'],
     k:  ['— Select K —','Eddy Piñeiro','Cade York','Greg Zuerlein','Younghoe Koo']
   };
-
-  // ---------- load players.json with robust fallback ----------
   let LOADED_LISTS = null;
   function setPlayersStatus(text, cls){
     const el = document.getElementById('players-status');
     el.textContent = text;
     el.className = 'statusbar ' + (cls||'');
   }
-
   async function loadPlayersJson(){
     const candidates = [
       'players.json?v=' + Date.now(),
@@ -311,7 +302,6 @@ setInterval(applyRevealGate, 30000);
         const res = await fetch(url, {cache:'no-store'});
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-
         const pos = data.positions || {};
         const withPH = (arr, label)=> ['— Select ' + label + ' —', ...(arr||[])];
         LOADED_LISTS = {
@@ -328,12 +318,10 @@ setInterval(applyRevealGate, 30000);
     LOADED_LISTS = FALLBACK_LISTS;
     setPlayersStatus('Using built-in player lists (players.json not found or invalid).', 'warn');
   }
-
   function fillSelect(id, arr){
     const el = document.getElementById(id);
     el.innerHTML = arr.map((name,i)=>`<option value="${i===0?'':name}" ${i===0?'disabled selected':''}>${name}</option>`).join('');
   }
-
   async function paintDropdowns(){
     if (!LOADED_LISTS) await loadPlayersJson();
     fillSelect('sel-qb', LOADED_LISTS.qb);
@@ -343,11 +331,12 @@ setInterval(applyRevealGate, 30000);
     fillSelect('sel-k',  LOADED_LISTS.k);
   }
 
-  // ---------- custom autocomplete for Name ----------
+  /* =========================
+     NAME AUTOCOMPLETE (custom)
+     ========================= */
   const nameInput = document.getElementById('name-input');
   const acList = document.getElementById('ac-list');
-  let acIndex = -1; // keyboard selection index
-
+  let acIndex = -1;
   function showSuggestions(items){
     if (!items.length){ acList.style.display='none'; return; }
     acList.innerHTML = items.map((n,i)=>`<div class="ac-item${i===0?' active':''}" data-name="${n}">${n}</div>`).join('');
@@ -355,10 +344,7 @@ setInterval(applyRevealGate, 30000);
     acIndex = 0;
   }
   function hideSuggestions(){ acList.style.display='none'; acIndex=-1; }
-  function currentSuggestions(){
-    return Array.from(acList.querySelectorAll('.ac-item'));
-  }
-
+  function currentSuggestions(){ return Array.from(acList.querySelectorAll('.ac-item')); }
   nameInput.addEventListener('input', () => {
     const q = nameInput.value.trim().toLowerCase();
     if (!q){ hideSuggestions(); return; }
@@ -370,9 +356,7 @@ setInterval(applyRevealGate, 30000);
     const hits = q ? ROSTER.filter(n => n.toLowerCase().includes(q)).slice(0,8) : ROSTER.slice(0,8);
     showSuggestions(hits);
   });
-  document.addEventListener('click', (e)=>{
-    if (!e.target.closest('.ac-wrap')) hideSuggestions();
-  });
+  document.addEventListener('click', (e)=>{ if (!e.target.closest('.ac-wrap')) hideSuggestions(); });
   acList.addEventListener('click', (e)=>{
     const it = e.target.closest('.ac-item'); if (!it) return;
     nameInput.value = it.dataset.name;
@@ -386,161 +370,176 @@ setInterval(applyRevealGate, 30000);
     if (e.key==='Escape'){ hideSuggestions(); }
   });
 
-  // ---------- roster chips ----------
+  /* =========================
+     CHIPS (render + instant/persistent green)
+     ========================= */
   function renderChips(submittedSet=new Set()){
     const box = document.getElementById('chips');
     box.innerHTML = ROSTER.map(n=>{
-      const submitted = submittedSet.has(n.toLowerCase().trim());
+      const submitted = submittedSet.has(norm(n));
       return `<span class="chip ${submitted?'submitted':''}">${n}</span>`;
     }).join('');
   }
   function markChipAsSubmitted(name){
     if (!name) return;
-    const target = name.toLowerCase().trim();
+    const target = norm(name);
     const container = document.getElementById('chips');
     [...container.querySelectorAll('.chip')].forEach(chip=>{
-      if (chip.textContent.toLowerCase().trim() === target){
+      if (norm(chip.textContent) === target){
         chip.classList.add('submitted');
       }
     });
   }
+  // Local optimistic cache per week
+  const LS_KEY = 'df_submitted_' + String(ACTIVE_WEEK);
+  function loadOptimisticMarks(){
+    try{
+      const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+      list.forEach(n => markChipAsSubmitted(n));
+    }catch{}
+  }
+  function rememberSubmitted(name){
+    try{
+      const set = new Set(JSON.parse(localStorage.getItem(LS_KEY) || '[]'));
+      set.add(norm(name));
+      localStorage.setItem(LS_KEY, JSON.stringify([...set]));
+    }catch{}
+  }
 
-  // ---------- standings + check-ins ----------
-async function fetchStandings(){
-  try{
-    const url = csvUrl();
-    if (url){
-      const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-      const res = await fetch(url + bust, {cache:'no-store'}); if(!res.ok) throw 0;
-      const text = await res.text();
-      const lines = text.trim().split(/\r?\n/);
-      const hdr = lines[0].split(',');
-      const idx = (h)=>hdr.indexOf(h);
+  /* =========================
+     STANDINGS (CSV-first; Apps Script fallback)
+     ========================= */
+  async function fetchStandings(){
+    try{
+      const url = csvUrl();
+      if (url){
+        const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+        const res = await fetch(url + bust, {cache:'no-store'}); if(!res.ok) throw 0;
+        const text = await res.text();
+        const lines = text.trim().split(/\r?\n/);
+        if (!lines.length) return [];
+        const hdr = lines[0].split(',');
+        const idx = (h)=>hdr.indexOf(h);
 
-      const qi = idx('qb_pts'), ri = idx('rb_pts'), wi = idx('wr_pts'),
-            ti = idx('te_pts'), ki = idx('k_pts'), toti = idx('total');
+        const qi = idx('qb_pts'), ri = idx('rb_pts'), wi = idx('wr_pts'),
+              ti = idx('te_pts'), ki = idx('k_pts'), toti = idx('total');
 
-      const toNum = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+        const toNum = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
 
-      return lines.slice(1).map(line=>{
-        const cols = line.split(',');
-        const row = {
-          name: cols[idx('name')] || '',
-          qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-          te: cols[idx('te')]||'', k: cols[idx('k')]||'',
-          qb_pts: qi>-1 ? cols[qi] : '',
-          rb_pts: ri>-1 ? cols[ri] : '',
-          wr_pts: wi>-1 ? cols[wi] : '',
-          te_pts: ti>-1 ? cols[ti] : '',
-          k_pts:  ki>-1 ? cols[ki] : '',
-          total:  toti>-1 ? cols[toti] : ''
-        };
-        // compute total if missing
-        if (!row.total) {
-          row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
-        }
-        return row;
-      }).filter(r=>r.name);
-    }else{
-      // fallback (Apps Script JSON)
-      const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-      return await res.json();
+        return lines.slice(1).map(line=>{
+          const cols = line.split(',');
+          const row = {
+            name: cols[idx('name')] || '',
+            qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
+            te: cols[idx('te')]||'', k: cols[idx('k')]||'',
+            qb_pts: qi>-1 ? cols[qi] : '',
+            rb_pts: ri>-1 ? cols[ri] : '',
+            wr_pts: wi>-1 ? cols[wi] : '',
+            te_pts: ti>-1 ? cols[ti] : '',
+            k_pts:  ki>-1 ? cols[ki] : '',
+            total:  toti>-1 ? cols[toti] : ''
+          };
+          if (!row.total){
+            row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
+          }
+          return row;
+        }).filter(r=>r.name);
+      }else{
+        const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
+        return await res.json();
+      }
+    }catch(e){
+      return []; // fail-soft if blocked
     }
-  }catch(e){
-    return [];
   }
-}
+  function renderStandings(rows){
+    const tbody = document.querySelector('#standings tbody');
+    tbody.innerHTML = rows.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${r.name||''}</td>
+        <td><strong>${r.total||''}</strong></td>
 
-
-    
-function renderStandings(rows){
-  const tbody = document.querySelector('#standings tbody');
-  tbody.innerHTML = rows.map((r,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td>${r.name||''}</td>
-      <td><strong>${r.total||''}</strong></td>
-
-      <td>${r.qb||''}</td><td>${r.qb_pts||''}</td>
-      <td>${r.rb||''}</td><td>${r.rb_pts||''}</td>
-      <td>${r.wr||''}</td><td>${r.wr_pts||''}</td>
-      <td>${r.te||''}</td><td>${r.te_pts||''}</td>
-      <td>${r.k||''}</td><td>${r.k_pts||''}</td>
-    </tr>
-  `).join('');
-}
-
-  async function refreshCheckins(){
-    const rows = await fetchStandings();
-    const submitted = new Set(rows.map(r=>(r.name||'').toLowerCase().trim()));
-    renderChips(submitted);
-    return rows;
+        <td>${r.qb||''}</td><td>${r.qb_pts||''}</td>
+        <td>${r.rb||''}</td><td>${r.rb_pts||''}</td>
+        <td>${r.wr||''}</td><td>${r.wr_pts||''}</td>
+        <td>${r.te||''}</td><td>${r.te_pts||''}</td>
+        <td>${r.k||''}</td><td>${r.k_pts||''}</td>
+      </tr>
+    `).join('');
   }
 
-  // ---------- submit ----------
+  /* =========================
+     SUBMIT HANDLER
+     - Instant green + remember
+     - POST to Apps Script
+     - Sync from CSV
+     ========================= */
   const form = document.getElementById('dud-form');
   const statusEl = document.getElementById('form-status');
-
   form?.addEventListener('submit', async (e)=>{
     e.preventDefault();
 
-    // ✅ run validation BEFORE doing anything else
     const err = validatePicks();
-    if (err) {
-      statusEl.textContent = err;
-      return; // stop submit
-    }
+    if (err) { statusEl.textContent = err; return; }
 
     statusEl.textContent = 'Submitting…';
+    const nameJustSubmitted = (nameInput.value || '').trim();
+
+    // Instant feedback + persist locally
+    markChipAsSubmitted(nameJustSubmitted);
+    rememberSubmitted(nameJustSubmitted);
+
     try{
       const fd = new FormData(form);
-      const nameJustSubmitted = (nameInput.value || '').trim();
-
       await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
       statusEl.textContent = 'Submitted! (check sheet)';
 
       form.reset();
-      await paintDropdowns();                    // keep placeholders
-      markChipAsSubmitted(nameJustSubmitted);    // instant green
+      await paintDropdowns();                // restore placeholders
+
+      // Try to sync from the sheet right away
       try { await refreshCheckins(); } catch {}
     }catch{
       statusEl.textContent = 'Error. Try again or contact the commish.';
     }
   });
 
-   // ---------- boot ----------
-// ---------- boot ----------
-(async function init(){
-  // ✅ set week hidden field for submissions
-  const weekField = document.getElementById('week-field');
-  if (weekField) weekField.value = ACTIVE_WEEK;
+  /* =========================
+     LIVE CHECK-INS
+     - Load from CSV
+     - Fast polling for 2 min, then 60s
+     ========================= */
+  async function refreshCheckins(){
+    const rows = await fetchStandings();
+    const submitted = new Set(rows.map(r => norm(r.name)));
+    renderChips(submitted);
+    return rows;
+  }
+  // Fast polling (every 15s) for ~2 minutes, then switch to 60s
+  let fastPolls = 0;
+  const fastTimer = setInterval(async () => {
+    await refreshCheckins();
+    if (++fastPolls >= 8) { // ~2 minutes
+      clearInterval(fastTimer);
+      setInterval(refreshCheckins, 60000); // steady state thereafter
+    }
+  }, 15000);
 
-  await paintDropdowns();
-  renderChips();
-  refreshCheckins();
+  /* =========================
+     BOOT
+     ========================= */
+  (async function init(){
+    // record week in hidden field
+    const weekField = document.getElementById('week-field');
+    if (weekField) weekField.value = ACTIVE_WEEK;
 
-  // if you're using the auto-reveal gate:
-  applyRevealGate?.();
-})();
-
-    // Re-check the sheet every 60 seconds
-setInterval(() => { refreshCheckins(); }, 60000);
-
+    await paintDropdowns();   // load players.json or fallback
+    renderChips();            // gray chips first
+    loadOptimisticMarks();    // show any local "submitted" marks immediately
+    refreshCheckins();        // then sync from the sheet (CSV)
+    applyRevealGate();        // show note or standings based on time
+  })();
 </script>
-
-
-  
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
