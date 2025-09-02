@@ -106,13 +106,22 @@
           <label>K <select name="k" id="sel-k"></select></label>
         </div>
 
-        <div class="full controls">
-          <button type="submit">Submit picks</button>
-          <span id="form-status" class="note"></span>
-        </div>
-      </form>
-    </div>
-  </section>
+    <section id="standings-section" style="margin-top:18px">
+  <div id="reveal-note" class="note">
+    Picks will be revealed at Noon Central on Sunday.
+  </div>
+
+  <div id="standings-wrap" class="card" style="overflow:auto; display:none">
+    <table id="standings">
+      <thead><tr>
+        <th>#</th><th>Name</th><th>Total</th><th>QB</th><th>RB</th><th>WR</th><th>TE</th><th>K</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
+
 
   <section id="week1" style="margin-top:18px">
     <h2>Player check-in</h2>
@@ -153,6 +162,67 @@
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv';
 
+    /* === WEEK & REVEAL SCHEDULE ===
+   - ACTIVE_WEEK: controls which week's CSV + reveal time to use.
+   - You can change it via URL too, e.g. ?week=5
+*/
+const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '1');
+
+/* Per-week CSV links (use your Publish-to-web “output=csv” links for each week).
+   For now I mapped week 1 to your existing CSV. Fill in the others later. */
+const WEEK_CSV = {
+  '1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv',
+  '5': '',  // TODO: paste week 5 CSV publish link
+  '9': '',  // TODO
+  '13': '', // TODO
+  '17': ''  // TODO
+};
+
+// Helper to pick the correct CSV for the active week (falls back to CSV_URL if set)
+function csvUrl(){
+  return WEEK_CSV[ACTIVE_WEEK] || CSV_URL || '';
+}
+
+/* Reveal times for America/Chicago (Central). These ISO strings include the offset,
+   so it works worldwide. Edit dates/times as needed. */
+const REVEAL_SCHEDULE = {
+  '1':  '2025-09-07T12:00:00-05:00', // Week 1 (CDT)
+  '5':  '2025-10-05T12:00:00-05:00', // Week 5 (CDT)
+  '9':  '2025-11-02T12:00:00-06:00', // Week 9 (CST starts Nov 2, 2025)
+  '13': '2025-11-30T12:00:00-06:00', // Week 13 (CST)
+  '17': '2025-12-28T12:00:00-06:00'  // Week 17 (CST)
+};
+
+// Determine if standings should be revealed now
+function isRevealedNow(){
+  const iso = REVEAL_SCHEDULE[ACTIVE_WEEK];
+  if (!iso) return false; // if not configured, keep hidden
+  const now = Date.now();
+  const unlock = new Date(iso).getTime();
+  return now >= unlock;
+}
+
+// Swap UI at the right time; auto-refresh when it flips
+async function applyRevealGate(){
+  const note = document.getElementById('reveal-note');
+  const tableWrap = document.getElementById('standings-wrap');
+
+  if (isRevealedNow()){
+    note.style.display = 'none';
+    tableWrap.style.display = 'block';
+    // First time we reveal, load standings
+    const rows = await fetchStandings();
+    renderStandings(rows);
+  }else{
+    note.style.display = 'block';
+    tableWrap.style.display = 'none';
+  }
+}
+
+// Check every 30s to flip from hidden → revealed at the exact moment
+setInterval(applyRevealGate, 30000);
+
+    
   /* Remember the last name typed so players don't retype it every week */
   (function persistName() {
     const saved = localStorage.getItem('df_name') || '';
@@ -311,31 +381,36 @@
   }
 
   // ---------- standings + check-ins ----------
-  async function fetchStandings(){
-    try{
-      if (CSV_URL){
-        const res = await fetch(CSV_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-        const text = await res.text();
-        const lines = text.trim().split(/\r?\n/);
-        const hdr = lines[0].split(',');
-        const idx = (h)=>hdr.indexOf(h);
-        return lines.slice(1).map(line=>{
-          const cols = line.split(',');
-          return {
-            name: cols[idx('name')] || '',
-            total: cols[idx('total')] || '',
-            qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-            te: cols[idx('te')]||'', k: cols[idx('k')]||''
-          };
-        }).filter(r=>r.name);
-      }else{
-        const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-        return await res.json();
-      }
-    }catch(e){
-      return []; // fail-soft if CORS blocks
+async function fetchStandings(){
+  try{
+    const url = csvUrl();
+    if (url){
+      const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res = await fetch(url + bust, {cache:'no-store'}); if(!res.ok) throw 0;
+      const text = await res.text();
+      const lines = text.trim().split(/\r?\n/);
+      const hdr = lines[0].split(',');
+      const idx = (h)=>hdr.indexOf(h);
+      return lines.slice(1).map(line=>{
+        const cols = line.split(',');
+        return {
+          name: cols[idx('name')] || '',
+          total: cols[idx('total')] || '',
+          qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
+          te: cols[idx('te')]||'', k: cols[idx('k')]||''
+        };
+      }).filter(r=>r.name);
+    }else{
+      // fallback: Apps Script JSON (may be CORS-blocked for non-you visitors)
+      const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
+      return await res.json();
     }
+  }catch(e){
+    return []; // fail-soft
   }
+}
+
+    
   function renderStandings(rows){
     const tbody = document.querySelector('#standings tbody');
     tbody.innerHTML = rows.map((r,i)=>`
@@ -382,32 +457,14 @@
     }
   });
 
-  // ---------- manual standings reveal ----------
-  const btnToggle = document.getElementById('toggle-standings');
-  const wrapStandings = document.getElementById('standings-wrap');
-  let standingsLoaded = false;
-  btnToggle.addEventListener('click', async ()=>{
-    const showing = wrapStandings.style.display === 'block';
-    if (showing){
-      wrapStandings.style.display = 'none';
-      btnToggle.textContent = 'Show standings';
-      return;
-    }
-    wrapStandings.style.display = 'block';
-    btnToggle.textContent = 'Hide standings';
-    if (!standingsLoaded){
-      const rows = await fetchStandings();
-      renderStandings(rows);
-      standingsLoaded = true;
-    }
-  });
-
-  // ---------- boot ----------
+   // ---------- boot ----------
   (async function init(){
     await paintDropdowns();     // loads players.json or fallback
     renderChips();              // gray chips first
     refreshCheckins();          // green for already-submitted (needs CSV_URL or CORS-friendly GET)
   })();
+
+    applyRevealGate(); // show note or standings based on current time
 
     // Re-check the sheet every 60 seconds
 setInterval(() => { refreshCheckins(); }, 60000);
@@ -418,6 +475,7 @@ setInterval(() => { refreshCheckins(); }, 60000);
   
 </body>
 </html>
+
 
 
 
