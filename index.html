@@ -154,6 +154,33 @@
   // If you publish your sheet (File → Share → Publish to web → CSV), paste that link here for CORS-free reads:
   const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv'
 
+  /* Remember the last name typed so players don't retype it every week */
+  (function persistName() {
+    const saved = localStorage.getItem('df_name') || '';
+    const input = document.getElementById('name-input');
+    if (input && saved) input.value = saved;
+    input?.addEventListener('input', () => {
+      localStorage.setItem('df_name', (input.value || '').trim());
+    });
+  })();
+
+  function validatePicks() {
+  const need = [
+    ['sel-qb', 'QB'],
+    ['sel-rb', 'RB'],
+    ['sel-wr', 'WR'],
+    ['sel-te', 'TE'],
+    ['sel-k',  'K']
+  ];
+  for (const [id,label] of need) {
+    const v = document.getElementById(id)?.value || '';
+    if (!v) return `Please select a ${label}.`;
+  }
+  const nm = (document.getElementById('name-input')?.value || '').trim();
+  if (!nm) return 'Please enter your name.';
+  return '';
+}
+  
   // === League roster (for autocomplete + chips) ===
   const ROSTER = [
     'David Cook',
@@ -326,26 +353,35 @@
   }
 
   // ---------- submit ----------
-  const form = document.getElementById('dud-form');
-  const statusEl = document.getElementById('form-status');
-  form?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    statusEl.textContent = 'Submitting…';
-    try{
-      const fd = new FormData(form);
-      const nameJustSubmitted = (nameInput.value || '').trim();
+const form = document.getElementById('dud-form');
+const statusEl = document.getElementById('form-status');
 
-      await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
-      statusEl.textContent = 'Submitted! (check sheet)';
+form?.addEventListener('submit', async (e)=>{
+  e.preventDefault();
 
-      form.reset();
-      await paintDropdowns();      // keep placeholders
-      markChipAsSubmitted(nameJustSubmitted); // instant green
-      try { await refreshCheckins(); } catch {}
-    }catch{
-      statusEl.textContent = 'Error. Try again or contact the commish.';
-    }
-  });
+  // ✅ run validation BEFORE doing anything else
+  const err = validatePicks();
+  if (err) {
+    statusEl.textContent = err;
+    return; // stop submit
+  }
+
+  statusEl.textContent = 'Submitting…';
+  try{
+    const fd = new FormData(form);
+    const nameJustSubmitted = (nameInput.value || '').trim();
+
+    await fetch(SCRIPT_URL, {method:'POST', mode:'no-cors', body:fd});
+    statusEl.textContent = 'Submitted! (check sheet)';
+
+    form.reset();
+    await paintDropdowns();                    // keep placeholders
+    markChipAsSubmitted(nameJustSubmitted);    // instant green
+    try { await refreshCheckins(); } catch {}
+  }catch{
+    statusEl.textContent = 'Error. Try again or contact the commish.';
+  }
+});
 
   // ---------- manual standings reveal ----------
   const btnToggle = document.getElementById('toggle-standings');
@@ -376,6 +412,7 @@
 </script>
 </body>
 </html>
+
 
 
 
