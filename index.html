@@ -845,53 +845,57 @@ function setRandomTagline() {
   /* =========================
      STANDINGS (CSV-first; Apps Script fallback)
      ========================= */
-  async function fetchStandings(){
-    try{
-      const url = csvUrl();
-      if (url){
-        const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-        const res = await fetch(url + bust, {cache:'no-store'}); if(!res.ok) throw 0;
-        const text = await res.text();
-        const lines = text.trim().split(/\r?\n/);
-        if (!lines.length) return [];
-        const hdr = lines[0].split(',');
-        const idx = (h)=>hdr.indexOf(h);
+async function fetchStandings(){
+  try{
+    const url = csvUrl();
+    if (url){
+      const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res = await fetch(url + bust, {cache:'no-store'}); if(!res.ok) throw 0;
+      const text = await res.text();
+      const lines = text.trim().split(/\r?\n/);
+      if (!lines.length) return [];
 
-        const qi = idx('qb_pts'), ri = idx('rb_pts'), wi = idx('wr_pts'),
-              ti = idx('te_pts'), ki = idx('k_pts'), toti = idx('total');
+      const hdr = lines[0].split(',');
+      const idx = (h)=>hdr.indexOf(h);
 
-        const toNum = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+      const qi = idx('qb_pts'), ri = idx('rb_pts'), wi = idx('wr_pts'),
+            ti = idx('te_pts'), ki = idx('k_pts'), toti = idx('total'),
+            lvi = idx('last_live_update');
 
-        return lines.slice(1).map(line=>{
-          const cols = line.split(',');
-          const row = {
-  name: cols[idx('name')] || '',
-  qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-  te: cols[idx('te')]||'', k: cols[idx('k')]||'',
-  qb_pts: qi>-1 ? cols[qi] : '',
-  rb_pts: ri>-1 ? cols[ri] : '',
-  wr_pts: wi>-1 ? cols[wi] : '',
-  te_pts: ti>-1 ? cols[ti] : '',
-  k_pts:  ki>-1 ? cols[ki] : '',
-  total:  toti>-1 ? cols[toti] : '',          // <-- add comma here
-  last_live_update: cols[idx('last_live_update')] || ''
-};
+      const toNum = v => {
+        const n = parseFloat(v);
+        return isNaN(n) ? 0 : n;
+      };
 
-
-          };
-          if (!row.total){
-            row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
-          }
-          return row;
-        }).filter(r=>r.name);
-      }else{
-        const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-        return await res.json();
-      }
-    }catch(e){
-      return []; // fail-soft if blocked
+      return lines.slice(1).map(line=>{
+        const cols = line.split(',');
+        const row = {
+          name: cols[idx('name')] || '',
+          qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
+          te: cols[idx('te')]||'', k: cols[idx('k')]||'',
+          qb_pts: qi>-1 ? cols[qi] : '',
+          rb_pts: ri>-1 ? cols[ri] : '',
+          wr_pts: wi>-1 ? cols[wi] : '',
+          te_pts: ti>-1 ? cols[ti] : '',
+          k_pts:  ki>-1 ? cols[ki] : '',
+          total:  toti>-1 ? cols[toti] : '',
+          last_live_update: lvi>-1 ? cols[lvi] : ''
+        };
+        if (!row.total){
+          row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
+        }
+        return row;
+      }).filter(r=>r.name);
+    }else{
+      const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
+      return await res.json();
     }
+  }catch(e){
+    console.error('fetchStandings error', e);
+    return [];
   }
+}
+
   function renderStandings(rows){
     const tbody = document.querySelector('#standings tbody');
     tbody.innerHTML = rows.map((r,i)=>`
@@ -1039,6 +1043,7 @@ function setRandomTagline() {
 </script>
 </body>
 </html>
+
 
 
 
