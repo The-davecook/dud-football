@@ -436,6 +436,8 @@ header{
     </div>
   </div>
 
+  <div id="last-update" class="note" style="display:none; margin:8px 0 10px;"></div>
+  
    <div id="standings-wrap" class="card" style="overflow:auto; display:none">
     <table id="standings">
       <thead>
@@ -586,6 +588,7 @@ function setRandomTagline() {
       // load standings once visible
       const rows = await fetchStandings();
       renderStandings(rows);
+      updateLastUpdatedFromRows(rows); 
     }else{
       note.style.display = 'block';
       tableWrap.style.display = 'none';
@@ -862,15 +865,19 @@ function setRandomTagline() {
         return lines.slice(1).map(line=>{
           const cols = line.split(',');
           const row = {
-            name: cols[idx('name')] || '',
-            qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-            te: cols[idx('te')]||'', k: cols[idx('k')]||'',
-            qb_pts: qi>-1 ? cols[qi] : '',
-            rb_pts: ri>-1 ? cols[ri] : '',
-            wr_pts: wi>-1 ? cols[wi] : '',
-            te_pts: ti>-1 ? cols[ti] : '',
-            k_pts:  ki>-1 ? cols[ki] : '',
-            total:  toti>-1 ? cols[toti] : ''
+  name: cols[idx('name')] || '',
+  qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
+  te: cols[idx('te')]||'', k: cols[idx('k')]||'',
+  qb_pts: qi>-1 ? cols[qi] : '',
+  rb_pts: ri>-1 ? cols[ri] : '',
+  wr_pts: wi>-1 ? cols[wi] : '',
+  te_pts: ti>-1 ? cols[ti] : '',
+  k_pts:  ki>-1 ? cols[ki] : '',
+  total:  toti>-1 ? cols[toti] : '',          // <-- add comma here
+  last_live_update: cols[idx('last_live_update')] || ''
+};
+
+
           };
           if (!row.total){
             row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
@@ -902,6 +909,46 @@ function setRandomTagline() {
     `).join('');
   }
 
+  function updateLastUpdatedFromRows(rows){
+  const el = document.getElementById('last-update');
+  if (!el) return;
+
+  const parse = (s) => {
+    const str = String(s || '').trim();
+    if (!str) return null;
+    const d1 = new Date(str);
+    if (!isNaN(d1)) return d1;
+    const m = str.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\s+(\d{1,2}):(\d{2})/);
+    if (m){
+      let [, mm, dd, yyyy, HH, MM] = m;
+      yyyy = yyyy ? (yyyy.length === 2 ? '20' + yyyy : yyyy) : String(new Date().getFullYear());
+      return new Date(Number(yyyy), Number(mm)-1, Number(dd), Number(HH), Number(MM));
+    }
+    return null;
+  };
+
+  let max = null;
+  for (const r of rows){
+    const d = parse(r.last_live_update);
+    if (d && (!max || d > max)) max = d;
+  }
+
+  if (!max){
+    el.style.display = 'none';
+    return;
+  }
+
+  const pad = n => String(n).padStart(2,'0');
+  const mm = pad(max.getMonth()+1);
+  const dd = pad(max.getDate());
+  const HH = pad(max.getHours());
+  const MM = pad(max.getMinutes());
+
+  el.textContent = `Last updated: ${mm}/${dd} ${HH}:${MM}`;
+  el.style.display = 'block';
+}
+
+  
   /* =========================
      SUBMIT HANDLER
      - Instant green + remember
@@ -961,6 +1008,7 @@ function setRandomTagline() {
     const rows = await fetchStandings();
     const submitted = new Set(rows.map(r => norm(r.name)));
     renderChips(submitted);
+      updateLastUpdatedFromRows(rows);   // <-- add this
     return rows;
   }
   // Fast polling (every 15s) for ~2 minutes, then switch to 60s
@@ -991,6 +1039,7 @@ function setRandomTagline() {
 </script>
 </body>
 </html>
+
 
 
 
