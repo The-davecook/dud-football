@@ -953,7 +953,7 @@ async function fetchStandings(){
   const HH = pad(max.getHours());
   const MM = pad(max.getMinutes());
 
-  el.textContent = `Last updated: ${mm}/${dd} ${HH}:${MM}`;
+  el.textContent = `Last updated: ${mm}/${dd} ${HH}:${MM}, sorted by score`;
   el.style.display = 'block';
 }
 
@@ -1048,6 +1048,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
