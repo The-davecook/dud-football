@@ -850,6 +850,7 @@ function setRandomTagline() {
   /* =========================
      STANDINGS (CSV-first; Apps Script fallback)
      ========================= */
+<script>
 async function fetchStandings(){
   try{
     const url = csvUrl();
@@ -860,46 +861,56 @@ async function fetchStandings(){
       const lines = text.trim().split(/\r?\n/);
       if (!lines.length) return [];
 
+      // headers + helpers
       const hdr = lines[0].split(',');
-      const idx = (h)=>hdr.indexOf(h);
+      const idx  = (h) => hdr.indexOf(h);
+      const get  = (cols, h) => { const i = idx(h); return i > -1 ? cols[i] : ''; };
+      const toNum = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
 
-      const qi = idx('qb_pts'), ri = idx('rb_pts'), wi = idx('wr_pts'),
-            ti = idx('te_pts'), ki = idx('k_pts'), toti = idx('total'),
-            lvi = idx('last_live_update');
+      // Prefer "Canonical Name" if present; fall back to "name"
+      const nameIdx = idx('Canonical Name') > -1 ? idx('Canonical Name') : idx('name');
 
-      const toNum = v => {
-        const n = parseFloat(v);
-        return isNaN(n) ? 0 : n;
-      };
-
-      return lines.slice(1).map(line=>{
+      // Build rows safely (guard missing columns)
+      const rows = lines.slice(1).map(line => {
         const cols = line.split(',');
-        const row = {
-          name: cols[idx('name')] || '',
-          qb: cols[idx('qb')]||'', rb: cols[idx('rb')]||'', wr: cols[idx('wr')]||'',
-          te: cols[idx('te')]||'', k: cols[idx('k')]||'',
-          qb_pts: qi>-1 ? cols[qi] : '',
-          rb_pts: ri>-1 ? cols[ri] : '',
-          wr_pts: wi>-1 ? cols[wi] : '',
-          te_pts: ti>-1 ? cols[ti] : '',
-          k_pts:  ki>-1 ? cols[ki] : '',
-          total:  toti>-1 ? cols[toti] : '',
-          last_live_update: lvi>-1 ? cols[lvi] : ''
+
+        const qb_pts = get(cols,'qb_pts'), rb_pts = get(cols,'rb_pts'),
+              wr_pts = get(cols,'wr_pts'), te_pts = get(cols,'te_pts'),
+              k_pts  = get(cols,'k_pts');
+
+        let total = get(cols,'total');
+        if (!total) total = (toNum(qb_pts)+toNum(rb_pts)+toNum(wr_pts)+toNum(te_pts)+toNum(k_pts)).toString();
+
+        return {
+          name: (nameIdx > -1 ? cols[nameIdx] : '') || '',
+          qb:   get(cols,'qb'), rb: get(cols,'rb'), wr: get(cols,'wr'),
+          te:   get(cols,'te'), k:  get(cols,'k'),
+          qb_pts, rb_pts, wr_pts, te_pts, k_pts,
+          total,
+          last_live_update: get(cols,'last_live_update')
         };
-        if (!row.total){
-          row.total = (toNum(row.qb_pts)+toNum(row.rb_pts)+toNum(row.wr_pts)+toNum(row.te_pts)+toNum(row.k_pts)) || '';
-        }
-        return row;
-      }).filter(r=>r.name);
+      }).filter(r => r.name);
+
+      // 🔑 Enforce numeric sort (low → high)
+      rows.sort((a,b) => toNum(a.total) - toNum(b.total));
+
+      return rows;
     }else{
+      // Apps Script JSON fallback
       const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
-      return await res.json();
+      const rows = await res.json();
+      // Also sort fallback data just in case
+      const toNum = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+      rows.sort((a,b) => toNum(a.total) - toNum(b.total));
+      return rows;
     }
   }catch(e){
     console.error('fetchStandings error', e);
     return [];
   }
 }
+</script>
+
 
   function renderStandings(rows){
     const tbody = document.querySelector('#standings tbody');
@@ -1048,6 +1059,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
