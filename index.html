@@ -353,7 +353,7 @@ header{
           <!-- Name with custom autocomplete -->
           <div class="full ac-wrap">
             <label>Name
-              <input type="text" name="name" id="name-input" autocomplete="off" required />
+      <input type="text" name="name" id="name-input" autocomplete="off" />
             </label>
             <div id="ac-list" class="ac-list"></div>
           </div>
@@ -638,8 +638,7 @@ function setRandomTagline() {
         return `Please type the other ${label}.`;
       }
     }
-    const nm = (document.getElementById('name-input')?.value || '').trim();
-    if (!nm) return 'Please enter your name.';
+   
     return '';
   }
   function norm(s){ return (s||'').toLowerCase().replace(/\s+/g,' ').trim(); }
@@ -1056,6 +1055,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
