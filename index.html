@@ -557,23 +557,23 @@ function setRandomTagline() {
      - Change ?week= in URL to switch (e.g., ?week=5)
      - FORCE_REVEAL with ?reveal=1 to test
      ========================= */
-  const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '1');
+  const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '6');
   const FORCE_REVEAL = new URLSearchParams(location.search).has('reveal');
 
   // Per-week CSV links (Publish to web → that week's "submissions" → CSV)
   const WEEK_CSV = {
     '1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv',
-    '5': '',  // TODO: paste week 5 CSV
-    '9': '',  // TODO
-    '13':'',  // TODO
-    '17':''   // TODO
+    '6': '',  // TODO: paste week 5 CSV
+    '10': '',  // TODO
+    '14':'',  // TODO
+    '18':''   // TODO
   };
   function csvUrl(){ return WEEK_CSV[ACTIVE_WEEK] || CSV_URL || ''; }
 
   // Noon Central (America/Chicago) for each game week (update dates per season)
   const REVEAL_SCHEDULE = {
     '1':  '2025-09-07T12:00:00-05:00', // Week 1 (CDT)
-    '5':  '2025-10-05T12:00:00-05:00', // Week 5 (CDT)
+    '6':  '2025-10-12T12:00:00-05:00', // Week 5 (CDT)
     '9':  '2025-11-02T12:00:00-06:00', // Week 9 (CST starts)
     '13': '2025-11-30T12:00:00-06:00', // Week 13
     '17': '2025-12-28T12:00:00-06:00'  // Week 17
@@ -1055,6 +1055,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
