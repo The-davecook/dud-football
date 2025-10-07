@@ -557,7 +557,7 @@ function setRandomTagline() {
      - Change ?week= in URL to switch (e.g., ?week=5)
      - FORCE_REVEAL with ?reveal=1 to test
      ========================= */
-  const ACTIVE_WEEK = (new URLSearchParams(location.search).get('week') || '6');
+  const ACTIVE_WEEK = Number(new URLSearchParams(location.search).get('week')) || 6;
   const FORCE_REVEAL = new URLSearchParams(location.search).has('reveal');
 
   // Per-week CSV links (Publish to web → that week's "submissions" → CSV)
@@ -1055,6 +1055,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
