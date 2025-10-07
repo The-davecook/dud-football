@@ -309,7 +309,7 @@ header{
     </div>
   </a>
 
-  <a class="match-card" href="#week1" aria-label="Broncos at Jets">
+  <a class="match-card" href="#week6" aria-label="Broncos at Jets">
     <img src="images/broncosJetsW6.jpeg?v=1" alt="Broncos at Jets">
     <div class="match-overlay">
       <div><strong>Live from London</strong></div>
@@ -317,7 +317,7 @@ header{
     </div>
   </a>
 
-  <a class="match-card" href="#week1" aria-label="Lions at Chiefs">
+  <a class="match-card" href="#week6" aria-label="Lions at Chiefs">
     <img src="images/LionsChiefsW6.png?v=1" alt="Lions at Chiefs">
     <div class="match-overlay">
       <div><strong>Sunday Night Football</strong></div>
@@ -325,7 +325,7 @@ header{
     </div>
   </a>
 
-  <a class="match-card" href="#week1" aria-label="Commanders at Bears">
+  <a class="match-card" href="#week6" aria-label="Commanders at Bears">
     <img src="images/BearsCommanders6.png?v=1" alt="Commanders at Bears">
     <div class="match-overlay">
       <div><strong>Monday Night Fooball</strong></div>
@@ -682,7 +682,7 @@ function setRandomTagline() {
     ];
     for (const url of candidates){
       try{
-        const res = await fetch(url, {cache:'no-store'});
+        const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, {cache:'no-store'});
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
         const pos = data.positions || {};
@@ -1055,6 +1055,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
