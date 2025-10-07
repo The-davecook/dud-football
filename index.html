@@ -474,7 +474,7 @@ header{
     </svg>
     The Dud Report
   </h2>
-<p> Oh, we're back baby. And with no shortage of dudly advice.  </p>
+<p> Rog wins week 1!  Where can you see the standings?  I dunno, I broke it.  Come back soon. </p>
     <p style="color: purple;">   
     <b>QB</b>: All the signs point to JJ McCarthy <b>(MIN) </b>actually going under center in 2025 having
    stolen the job from Sam Darnold. Darnold, who treated the purple fandom to 9 sacks 
@@ -675,32 +675,44 @@ function setRandomTagline() {
   el.className = 'statusbar ' + (cls || '');
 }
 
-  async function loadPlayersJson(){
-    const candidates = [
-      'players.json?v=' + Date.now(),
-      location.origin + location.pathname.replace(/index\.html?$/,'') + 'players.json?v=' + Date.now()
-    ];
-    for (const url of candidates){
-      try{
-        const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, {cache:'no-store'});
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const pos = data.positions || {};
-        const withPH = (arr, label)=> ['— Select ' + label + ' —', ...(arr||[])];
-        LOADED_LISTS = {
-          qb: withPH(pos.qb, 'QB'),
-          rb: withPH(pos.rb, 'RB'),
-          wr: withPH(pos.wr, 'WR'),
-          te: withPH(pos.te, 'TE'),
-          k:  withPH(pos.k,  'K')
-        };
-        setPlayersStatus('Loaded players from players.json', 'ok');
-        return;
-      }catch(e){ /* try next candidate */ }
+ async function loadPlayersJson(){
+  const candidates = [
+    'players.json?v=' + Date.now(),
+    location.origin + location.pathname.replace(/index\.html?$/,'') + 'players.json?v=' + Date.now()
+  ];
+
+  for (const url of candidates){
+    try{
+      const res = await fetch(url, { cache: 'no-store' });     // ← fetch the actual players.json
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      // Expect the same shape we built earlier:
+      // { "positions": { qb:[...], rb:[...], wr:[...], te:[...], k:[...] } }
+      const pos = (data && data.positions) ? data.positions : null;
+      if (!pos || !pos.qb || !pos.rb || !pos.wr || !pos.te || !pos.k) {
+        throw new Error('players.json missing expected keys');
+      }
+
+      const withPH = (arr, label)=> ['— Select ' + label + ' —', ...(arr||[])];
+      LOADED_LISTS = {
+        qb: withPH(pos.qb, 'QB'),
+        rb: withPH(pos.rb, 'RB'),
+        wr: withPH(pos.wr, 'WR'),
+        te: withPH(pos.te, 'TE'),
+        k:  withPH(pos.k,  'K')
+      };
+      setPlayersStatus('Loaded players from players.json', 'ok');
+      return;
+    }catch(e){
+      // try next candidate
     }
-    LOADED_LISTS = FALLBACK_LISTS;
-    setPlayersStatus('Using built-in player lists (players.json not found or invalid).', 'warn');
   }
+
+  // If we reach here, both candidates failed → fallback
+  LOADED_LISTS = FALLBACK_LISTS;
+  setPlayersStatus('Using built-in player lists (players.json not found or invalid).', 'warn');
+}
 
   // Keep only the first QB/K per team (assumes starters come first in players.json)
   function startersOnly(list, label){
@@ -1055,6 +1067,7 @@ async function fetchStandings(){
 </script>
 </body>
 </html>
+
 
 
 
