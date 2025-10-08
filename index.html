@@ -563,17 +563,17 @@ function setRandomTagline() {
   // Per-week CSV links (Publish to web → that week's "submissions" → CSV)
   const WEEK_CSV = {
     '1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv',
-    '6': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=1258487265&single=true&output=csv',  
+    '6': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=1258487265&single=true&output=csv',
     '10': '',  // TODO
     '14':'',  // TODO
     '18':''   // TODO
   };
-  function csvUrl(){ return WEEK_CSV[ACTIVE_WEEK] || CSV_URL || ''; }
+ function csvUrl(){ return WEEK_CSV[String(ACTIVE_WEEK)] || ''; }
 
   // Noon Central (America/Chicago) for each game week (update dates per season)
   const REVEAL_SCHEDULE = {
     '1':  '2025-09-07T12:00:00-05:00', // Week 1 (CDT)
-    '6':  '2025-10-12T12:00:00-05:00', // Week 5 (CDT)
+    '6':  '2025-10-12T12:00:00-05:00', // Week 6 (CDT)
     '9':  '2025-11-02T12:00:00-06:00', // Week 9 (CST starts)
     '13': '2025-11-30T12:00:00-06:00', // Week 13
     '17': '2025-12-28T12:00:00-06:00'  // Week 17
@@ -675,21 +675,20 @@ function setRandomTagline() {
   el.className = 'statusbar ' + (cls || '');
 }
 
- async function loadPlayersJson(){
+async function loadPlayersJson(){
+  const cacheBuster = 'v=' + Date.now();
   const candidates = [
-    'players.json?v=' + Date.now(),
-    location.origin + location.pathname.replace(/index\.html?$/,'') + 'players.json?v=' + Date.now()
+    'players.json?' + cacheBuster,
+    location.origin + location.pathname.replace(/index\.html?$/,'') + 'players.json?' + cacheBuster
   ];
 
   for (const url of candidates){
     try{
-      const res = await fetch(url, { cache: 'no-store' });     // ← fetch the actual players.json
+      const res = await fetch(url, { cache: 'no-store' }); // <-- key fix
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
 
-      // Expect the same shape we built earlier:
-      // { "positions": { qb:[...], rb:[...], wr:[...], te:[...], k:[...] } }
-      const pos = (data && data.positions) ? data.positions : null;
+      const pos = data && data.positions ? data.positions : null;
       if (!pos || !pos.qb || !pos.rb || !pos.wr || !pos.te || !pos.k) {
         throw new Error('players.json missing expected keys');
       }
@@ -709,9 +708,9 @@ function setRandomTagline() {
     }
   }
 
-  // If we reach here, both candidates failed → fallback
+  // Fallback if players.json missing
   LOADED_LISTS = FALLBACK_LISTS;
-  setPlayersStatus('Using built-in player lists (players.json not found or invalid).', 'warn');
+  setPlayersStatus('Using built-in player lists (players.json not found).', 'warn');
 }
 
   // Keep only the first QB/K per team (assumes starters come first in players.json)
@@ -866,7 +865,7 @@ async function fetchStandings(){
     const url = csvUrl();
     if (url){
       const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-      const res = await fetch(url + bust, {cache:'no-store'}); if(!res.ok) throw 0;
+      const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, {cache:'no-store'}); if(!res.ok) throw 0;
       const text = await res.text();
       const lines = text.trim().split(/\r?\n/);
       if (!lines.length) return [];
@@ -907,7 +906,10 @@ async function fetchStandings(){
       return rows;
     }else{
       // Apps Script JSON fallback
-      const res = await fetch(STANDINGS_URL, {cache:'no-store'}); if(!res.ok) throw 0;
+// Apps Script JSON fallback (keep your surrounding try/catch logic)
+const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, { cache: 'no-store' });  // <-- add &week
+if (!res.ok) throw 0;
+
       const rows = await res.json();
       // Also sort fallback data just in case
       const toNum = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
@@ -1055,22 +1057,30 @@ async function fetchStandings(){
      BOOT
      ========================= */
    (async function init(){
-     setRandomTagline();             
-     // record week in hidden field
-     const weekField = document.getElementById('week-field');
-     if (weekField) weekField.value = ACTIVE_WEEK;
+  setRandomTagline();
 
-     await paintDropdowns();   // load players.json or fallback
-+    try { localStorage.removeItem('df_submitted_' + String(ACTIVE_WEEK)); } catch {}
-     renderChips();            // gray chips first
-     // loadOptimisticMarks();  // (kept disabled from Step 1)
-     refreshCheckins();        // then sync from the sheet (CSV)
-     applyRevealGate();        // show note or standings based on time
-   })();
+  // record week in hidden field
+  const weekField = document.getElementById('week-field');
+  if (weekField) weekField.value = ACTIVE_WEEK;
+
+  await paintDropdowns();   // loads players.json (or fallback)
+
+  // HARD RESET any stale optimistic marks for this week  <-- add
+  try { localStorage.removeItem('df_submitted_' + String(ACTIVE_WEEK)); } catch {}
+
+  renderChips();            // gray chips first
+
+  // loadOptimisticMarks();  // <-- keep this commented out
+
+  refreshCheckins();        // then sync from the sheet (CSV/JSON)
+  applyRevealGate();        // time-based lock for standings
+})();
+
 
 </script>
 </body>
 </html>
+
 
 
 
