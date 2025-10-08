@@ -865,8 +865,10 @@ async function fetchStandings(){
     const url = csvUrl();
     if (url){
       const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-      const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, {cache:'no-store'}); if(!res.ok) throw 0;
+      const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res = await fetch(url + bust, { cache: 'no-store' }); if (!res.ok) throw 0;
       const text = await res.text();
+
       const lines = text.trim().split(/\r?\n/);
       if (!lines.length) return [];
 
@@ -1080,6 +1082,7 @@ if (!res.ok) throw 0;
 </script>
 </body>
 </html>
+
 
 
 
