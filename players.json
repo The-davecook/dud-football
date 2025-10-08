@@ -2,9 +2,9 @@
   "positions": {
     "qb": [
       "Jalen Hurts (PHI)",
-      "Daniel Jones (NYG)",
+      "Jaxson Dart (NYG)",
       "Bo Nix (DEN)",
-      "Aaron Rodgers (NYJ)",
+      "Justin Fields (NYJ)",
       "Jared Goff (DET)",
       "Patrick Mahomes (KC)",
       "Caleb Williams (CHI)",
@@ -12,89 +12,112 @@
     ],
     "rb": [
       "Saquon Barkley (PHI)",
+      "AJ Dillon (PHI)",
       "Will Shipley (PHI)",
-      "A.J. Dillon (PHI)",
+
+      "Cam Skattebo (NYG)",
+      "Tyrone Tracy Jr. (NYG)",
       "Devin Singletary (NYG)",
-      "Eric Gray (NYG)",
+
       "J.K. Dobbins (DEN)",
-      "Jaleel McLaughlin (DEN)",
       "RJ Harvey (DEN)",
+      "Tyler Badie (DEN)",
+
       "Breece Hall (NYJ)",
-      "Israel Abanikanda (NYJ)",
-      "Braelon Allen (NYJ)",
+      "Isaiah Davis (NYJ)",
+      "Khalil Herbert (NYJ)",
+
       "Jahmyr Gibbs (DET)",
       "David Montgomery (DET)",
       "Craig Reynolds (DET)",
+
       "Isiah Pacheco (KC)",
       "Kareem Hunt (KC)",
-      "Elijah Mitchell (KC)",
+      "Brashard Smith (KC)",
+
       "D'Andre Swift (CHI)",
+      "Kyle Monangai (CHI)",
       "Roschon Johnson (CHI)",
-      "Khalil Herbert (CHI)",
-      "Brian Robinson Jr. (WAS)",
-      "Austin Ekeler (WAS)",
-      "Chris Rodriguez Jr. (WAS)"
+
+      "Jacory Croskey-Merritt (WAS)",
+      "Chris Rodriguez Jr. (WAS)",
+      "Jeremy McNichols (WAS)"
     ],
     "wr": [
       "A.J. Brown (PHI)",
       "DeVonta Smith (PHI)",
-      "John Metchie III (PHI)",
       "Jahan Dotson (PHI)",
-      "Malik Nabers (NYG)",
+      "John Metchie III (PHI)",
+      "Xavier Gipson (PHI)",
+
       "Wan'Dale Robinson (NYG)",
       "Darius Slayton (NYG)",
       "Jalin Hyatt (NYG)",
+      "Beaux Collins (NYG)",
+      "Gunner Olszewski (NYG)",
+
       "Courtland Sutton (DEN)",
-      "Marvin Mims Jr. (DEN)",
       "Troy Franklin (DEN)",
+      "Marvin Mims Jr. (DEN)",
+      "Pat Bryant (DEN)",
+      "Trent Sherfield Sr. (DEN)",
+
       "Garrett Wilson (NYJ)",
-      "Mike Williams (NYJ)",
-      "Malachi Corley (NYJ)",
+      "Josh Reynolds (NYJ)",
+      "Arian Smith (NYJ)",
+      "Allen Lazard (NYJ)",
+      "Tyler Johnson (NYJ)",
+
       "Amon-Ra St. Brown (DET)",
       "Jameson Williams (DET)",
       "Kalif Raymond (DET)",
+      "Isaac TeSlaa (DET)",
       "Dominic Lovett (DET)",
+
       "Xavier Worthy (KC)",
       "Marquise Brown (KC)",
-      "Rashee Rice (KC)",
       "JuJu Smith-Schuster (KC)",
+      "Tyquan Thornton (KC)",
+      "Jalen Royals (KC)",
+
       "DJ Moore (CHI)",
       "Rome Odunze (CHI)",
-      "Keenan Allen (CHI)",
-      "Tyler Scott (CHI)",
+      "Luther Burden III (CHI)",
+      "Devin Duvernay (CHI)",
+      "Olamide Zaccheaus (CHI)",
+
       "Terry McLaurin (WAS)",
+      "Deebo Samuel (WAS)",
       "Luke McCaffrey (WAS)",
-      "Dyami Brown (WAS)"
+      "Noah Brown (WAS)",
+      "Jaylin Lane (WAS)"
     ],
     "te": [
       "Dallas Goedert (PHI)",
       "Grant Calcaterra (PHI)",
-      "Kylen Granson (PHI)",
-      "Daniel Bellinger (NYG)",
+
       "Theo Johnson (NYG)",
+      "Daniel Bellinger (NYG)",
+
       "Evan Engram (DEN)",
       "Adam Trautman (DEN)",
-      "Tyler Conklin (NYJ)",
+
+      "Mason Taylor (NYJ)",
       "Jeremy Ruckert (NYJ)",
+
       "Sam LaPorta (DET)",
       "Brock Wright (DET)",
+
       "Travis Kelce (KC)",
       "Noah Gray (KC)",
-      "Robert Tonyan (KC)",
+
       "Cole Kmet (CHI)",
-      "Gerald Everett (CHI)",
+      "Colston Loveland (CHI)",
+
       "Zach Ertz (WAS)",
-      "Ben Sinnott (WAS)"
+      "John Bates (WAS)"
     ],
     "k": [
       "Jake Elliott (PHI)",
       "Graham Gano (NYG)",
-      "Wil Lutz (DEN)",
-      "Greg Zuerlein (NYJ)",
-      "Jake Bates (DET)",
-      "Harrison Butker (KC)",
-      "Cairo Santos (CHI)",
-      "Brandon McManus (WAS)"
-    ]
-  }
-}
+      "Wil
