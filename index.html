@@ -860,31 +860,27 @@ async function loadPlayersJson(){
   /* =========================
      STANDINGS (CSV-first; Apps Script fallback)
      ========================= */
+
 async function fetchStandings(){
   try{
     const url = csvUrl();
     if (url){
       const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-      const bust = (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-      const res = await fetch(url + bust, { cache: 'no-store' }); if (!res.ok) throw 0;
+      const res = await fetch(url + bust, { cache:'no-store' });   // <-- use the CSV!
+      if(!res.ok) throw 0;
       const text = await res.text();
-
       const lines = text.trim().split(/\r?\n/);
       if (!lines.length) return [];
 
-      // headers + helpers
-      const hdr = lines[0].split(',');
+      const hdr  = lines[0].split(',');
       const idx  = (h) => hdr.indexOf(h);
       const get  = (cols, h) => { const i = idx(h); return i > -1 ? cols[i] : ''; };
       const toNum = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
 
-      // Prefer "Canonical Name" if present; fall back to "name"
       const nameIdx = idx('Canonical Name') > -1 ? idx('Canonical Name') : idx('name');
 
-      // Build rows safely (guard missing columns)
       const rows = lines.slice(1).map(line => {
         const cols = line.split(',');
-
         const qb_pts = get(cols,'qb_pts'), rb_pts = get(cols,'rb_pts'),
               wr_pts = get(cols,'wr_pts'), te_pts = get(cols,'te_pts'),
               k_pts  = get(cols,'k_pts');
@@ -902,18 +898,13 @@ async function fetchStandings(){
         };
       }).filter(r => r.name);
 
-      // 🔑 Enforce numeric sort (low → high)
       rows.sort((a,b) => toNum(a.total) - toNum(b.total));
-
       return rows;
     }else{
       // Apps Script JSON fallback
-// Apps Script JSON fallback (keep your surrounding try/catch logic)
-const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, { cache: 'no-store' });  // <-- add &week
-if (!res.ok) throw 0;
-
+      const res = await fetch(`${STANDINGS_URL}&week=${ACTIVE_WEEK}`, { cache: 'no-store' });
+      if (!res.ok) throw 0;
       const rows = await res.json();
-      // Also sort fallback data just in case
       const toNum = (v) => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
       rows.sort((a,b) => toNum(a.total) - toNum(b.total));
       return rows;
@@ -1082,6 +1073,7 @@ if (!res.ok) throw 0;
 </script>
 </body>
 </html>
+
 
 
 
