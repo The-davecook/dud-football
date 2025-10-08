@@ -1067,12 +1067,33 @@ async function fetchStandings(){
 
   refreshCheckins();        // then sync from the sheet (CSV/JSON)
   applyRevealGate();        // time-based lock for standings
+
+     // Auto-unlock standings at reveal time (checks every 15s)
+(function watchReveal(){
+  const tick = async () => {
+    // if your code already has these, reuse them:
+    const nowRevealed = (typeof shouldRevealStandings === 'function')
+      ? shouldRevealStandings()
+      : (typeof isRevealedNow === 'function' ? isRevealedNow() : false);
+
+    if (nowRevealed || FORCE_REVEAL) {
+      // flip UI to revealed state and pull fresh data once
+      if (typeof applyRevealGate === 'function') applyRevealGate();
+      await refreshCheckins();   // chips + (now-visible) standings refresh
+      clearInterval(timer);
+    }
+  };
+  const timer = setInterval(tick, 15000);
+  tick(); // run once immediately
+})();
+
 })();
 
 
 </script>
 </body>
 </html>
+
 
 
 
