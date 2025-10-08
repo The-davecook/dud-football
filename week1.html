@@ -287,32 +287,60 @@ header{
   @media (max-width: 600px) {
     .embed { height: 74vh; }  /* still tall without trapping the screen */
   }
-    
+
+    .site-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}
+.site-tabs .tab{padding:.5rem .8rem;border-radius:9999px;background:#f3f4f6;text-decoration:none;color:#111}
+.site-tabs .tab:hover{background:#e5e7eb}
+.site-tabs .current{background:#111;color:#fff}
+
+.tagline{color:#2563eb;font-weight:600;margin:.25rem 0 1rem}
+
   </style>
   
 </head>
 <body>
   <!-- ✂️ copy your exact header markup from index.html and paste it here -->
   <header class="wrap">
-    <h1>Dud Football</h1>
-    <nav><a href="./">Back to home</a></nav>
-  </header>
+  <h1>Dud Football</h1>
+  <nav class="site-tabs">
+    <a href="./" class="tab">Current Week</a>
+    <a href="./week1.html" class="tab current">Week 1 (Final)</a>
+  </nav>
+</header>
 
-  <main class="wrap">
-    <h2>Week 1 Standings (Final)</h2>
-    <!-- Read-only embed of the Week 1 sheet; no scripts, no polling -->
-    <iframe
-      class="embed"
-      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pubhtml?gid=0&single=true"
-      loading="lazy"
-      referrerpolicy="no-referrer">
-    </iframe>
-    <p style="margin-top:.75rem;">This page is locked—no live updates for Week 1.</p>
-  </main>
+
+ <main class="wrap">
+  <h2>Week 1</h2>
+  <p id="tagline" class="tagline"></p>
+
+  <iframe
+    class="embed"
+    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pubhtml?gid=GID_OF_SUBMISSIONS_W1&single=true&widget=false&headers=false"
+    loading="lazy"
+    referrerpolicy="no-referrer">
+  </iframe>
+</main>
+
 
   <!-- ✂️ copy your exact footer markup from index.html and paste it here -->
   <footer class="wrap">
     <div>&copy; 2025 Dud Football</div>
   </footer>
+
+  <script>
+  (function setRandomTagline(){
+    const lines = [
+      "Relive the glorious duds of Week 1.",
+      "So many punts. So little glory.",
+      "WR screens for -1 yard: chef’s kiss.",
+      "Week 1: where checkdowns go to thrive.",
+      "Three-and-out aficionados, unite.",
+      "The art of almost scoring."
+    ];
+    const el = document.getElementById('tagline');
+    if (el) el.textContent = lines[Math.floor(Math.random()*lines.length)];
+  })();
+</script>
+
 </body>
 </html>
