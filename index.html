@@ -996,8 +996,10 @@ async function fetchStandings(){
     const nameJustSubmitted = (nameInput.value || '').trim();
 
     // Instant feedback + persist locally
-    markChipAsSubmitted(nameJustSubmitted);
-    rememberSubmitted(nameJustSubmitted);
+ // Instant feedback + persist locally
+ // markChipAsSubmitted(nameJustSubmitted);
+ // rememberSubmitted(nameJustSubmitted);
+
 
     try{
       const fd = new FormData(form);
@@ -1052,21 +1054,24 @@ async function fetchStandings(){
   /* =========================
      BOOT
      ========================= */
-  (async function init(){
-    setRandomTagline();             
-    // record week in hidden field
-    const weekField = document.getElementById('week-field');
-    if (weekField) weekField.value = ACTIVE_WEEK;
+   (async function init(){
+     setRandomTagline();             
+     // record week in hidden field
+     const weekField = document.getElementById('week-field');
+     if (weekField) weekField.value = ACTIVE_WEEK;
 
-    await paintDropdowns();   // load players.json or fallback
-    renderChips();            // gray chips first
-    loadOptimisticMarks();    // show any local "submitted" marks immediately
-    refreshCheckins();        // then sync from the sheet (CSV)
-    applyRevealGate();        // show note or standings based on time
-  })();
+     await paintDropdowns();   // load players.json or fallback
++    try { localStorage.removeItem('df_submitted_' + String(ACTIVE_WEEK)); } catch {}
+     renderChips();            // gray chips first
+     // loadOptimisticMarks();  // (kept disabled from Step 1)
+     refreshCheckins();        // then sync from the sheet (CSV)
+     applyRevealGate();        // show note or standings based on time
+   })();
+
 </script>
 </body>
 </html>
+
 
 
 
