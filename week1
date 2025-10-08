@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dud Football — Week 1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="favicon.ico" />
+  <!-- if you have a site stylesheet, keep this line the same as index.html -->
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Just to make the embed look great */
+    .wrap { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+    .embed {
+      width: 100%;
+      height: 75vh; /* tall enough to see the table */
+      border: 0;
+      box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      border-radius: 12px;
+      background: #fff;
+    }
+    header, footer { padding: 1rem 0; }
+    footer { opacity: .8; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <!-- ✂️ copy your exact header markup from index.html and paste it here -->
+  <header class="wrap">
+    <h1>Dud Football</h1>
+    <nav><a href="./">Back to current week</a></nav>
+  </header>
+
+  <main class="wrap">
+    <h2>Week 1 Standings (Final)</h2>
+    <!-- Read-only embed of the Week 1 sheet; no scripts, no polling -->
+    <iframe
+      class="embed"
+      src="https://docs.google.com/spreadsheets/d/1FJHbjSgnLVyhLjzkqi2sPEejNb8ssFrFCT9cgiMoGZw/pubhtml?gid=GID_OF_SUBMISSIONS_W1&single=true&widget=false&headers=false"
+      loading="lazy"
+      referrerpolicy="no-referrer">
+    </iframe>
+    <p style="margin-top:.75rem;">This page is locked—no live updates for Week 1.</p>
+  </main>
+
+  <!-- ✂️ copy your exact footer markup from index.html and paste it here -->
+  <footer class="wrap">
+    <div>&copy; 2025 Dud Football</div>
+  </footer>
+</body>
+</html>
