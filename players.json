@@ -1,131 +1,131 @@
 {
   "positions": {
     "qb": [
-      "Jalen Hurts (PHI)",
-      "Jaxson Dart (NYG)",
-      "Bo Nix (DEN)",
-      "Justin Fields (NYJ)",
-      "Jared Goff (DET)",
-      "Patrick Mahomes (KC)",
+      "Lamar Jackson (BAL)",
+      "Tua Tagovailoa (MIA)",
       "Caleb Williams (CHI)",
-      "Jayden Daniels (WAS)"
+      "Joe Burrow (CIN)",
+      "Geno Smith (SEA)",
+      "Jayden Daniels (WAS)",
+      "Dak Prescott (DAL)",
+      "Kyler Murray (ARI)"
     ],
     "rb": [
-      "Saquon Barkley (PHI)",
-      "AJ Dillon (PHI)",
-      "Will Shipley (PHI)",
+      "Derrick Henry (BAL)",
+      "Keaton Mitchell (BAL)",
+      "Justice Hill (BAL)",
 
-      "Cam Skattebo (NYG)",
-      "Tyrone Tracy Jr. (NYG)",
-      "Devin Singletary (NYG)",
-
-      "J.K. Dobbins (DEN)",
-      "RJ Harvey (DEN)",
-      "Tyler Badie (DEN)",
-
-      "Breece Hall (NYJ)",
-      "Isaiah Davis (NYJ)",
-      "Khalil Herbert (NYJ)",
-
-      "Jahmyr Gibbs (DET)",
-      "David Montgomery (DET)",
-      "Craig Reynolds (DET)",
-
-      "Isiah Pacheco (KC)",
-      "Kareem Hunt (KC)",
-      "Brashard Smith (KC)",
+      "Raheem Mostert (MIA)",
+      "De'Von Achane (MIA)",
+      "Jeff Wilson Jr. (MIA)",
 
       "D'Andre Swift (CHI)",
-      "Kyle Monangai (CHI)",
+      "Khalil Herbert (CHI)",
       "Roschon Johnson (CHI)",
 
-      "Jacory Croskey-Merritt (WAS)",
+      "Zack Moss (CIN)",
+      "Chase Brown (CIN)",
+      "Trayveon Williams (CIN)",
+
+      "Kenneth Walker III (SEA)",
+      "Zach Charbonnet (SEA)",
+      "Kenny McIntosh (SEA)",
+
+      "Brian Robinson Jr. (WAS)",
+      "Austin Ekeler (WAS)",
       "Chris Rodriguez Jr. (WAS)",
-      "Jeremy McNichols (WAS)"
+
+      "Rico Dowdle (DAL)",
+      "Ezekiel Elliott (DAL)",
+      "Deuce Vaughn (DAL)",
+
+      "James Conner (ARI)",
+      "Emari Demercado (ARI)",
+      "Michael Carter (ARI)"
     ],
     "wr": [
-      "A.J. Brown (PHI)",
-      "DeVonta Smith (PHI)",
-      "Jahan Dotson (PHI)",
-      "John Metchie III (PHI)",
-      "Xavier Gipson (PHI)",
+      "Zay Flowers (BAL)",
+      "Rashod Bateman (BAL)",
+      "DeAndre Hopkins (BAL)",
+      "Nelson Agholor (BAL)",
+      "Tylan Wallace (BAL)",
 
-      "Wan'Dale Robinson (NYG)",
-      "Darius Slayton (NYG)",
-      "Jalin Hyatt (NYG)",
-      "Beaux Collins (NYG)",
-      "Gunner Olszewski (NYG)",
-
-      "Courtland Sutton (DEN)",
-      "Troy Franklin (DEN)",
-      "Marvin Mims Jr. (DEN)",
-      "Pat Bryant (DEN)",
-      "Trent Sherfield Sr. (DEN)",
-
-      "Garrett Wilson (NYJ)",
-      "Josh Reynolds (NYJ)",
-      "Arian Smith (NYJ)",
-      "Allen Lazard (NYJ)",
-      "Tyler Johnson (NYJ)",
-
-      "Amon-Ra St. Brown (DET)",
-      "Jameson Williams (DET)",
-      "Kalif Raymond (DET)",
-      "Isaac TeSlaa (DET)",
-      "Dominic Lovett (DET)",
-
-      "Xavier Worthy (KC)",
-      "Marquise Brown (KC)",
-      "JuJu Smith-Schuster (KC)",
-      "Tyquan Thornton (KC)",
-      "Jalen Royals (KC)",
+      "Tyreek Hill (MIA)",
+      "Jaylen Waddle (MIA)",
+      "Braxton Berrios (MIA)",
+      "River Cracraft (MIA)",
+      "Erik Ezukanma (MIA)",
 
       "DJ Moore (CHI)",
+      "Keenan Allen (CHI)",
       "Rome Odunze (CHI)",
-      "Luther Burden III (CHI)",
-      "Devin Duvernay (CHI)",
-      "Olamide Zaccheaus (CHI)",
+      "Tyler Scott (CHI)",
+      "Velus Jones Jr. (CHI)",
+
+      "Ja'Marr Chase (CIN)",
+      "Tee Higgins (CIN)",
+      "Jermaine Burton (CIN)",
+      "Andrei Iosivas (CIN)",
+      "Trenton Irwin (CIN)",
+
+      "DK Metcalf (SEA)",
+      "Tyler Lockett (SEA)",
+      "Jaxon Smith-Njigba (SEA)",
+      "Jake Bobo (SEA)",
+      "Dee Eskridge (SEA)",
 
       "Terry McLaurin (WAS)",
-      "Deebo Samuel (WAS)",
+      "Jahan Dotson (WAS)",
       "Luke McCaffrey (WAS)",
-      "Noah Brown (WAS)",
-      "Jaylin Lane (WAS)"
+      "Olamide Zaccheaus (WAS)",
+      "Jaylin Lane (WAS)",
+
+      "CeeDee Lamb (DAL)",
+      "Brandin Cooks (DAL)",
+      "Jalen Tolbert (DAL)",
+      "KaVontae Turpin (DAL)",
+      "Jalen Brooks (DAL)",
+
+      "Marvin Harrison Jr. (ARI)",
+      "Michael Wilson (ARI)",
+      "Zay Jones (ARI)",
+      "Greg Dortch (ARI)",
+      "Xavier Weaver (ARI)"
     ],
     "te": [
-      "Dallas Goedert (PHI)",
-      "Grant Calcaterra (PHI)",
+      "Mark Andrews (BAL)",
+      "Isaiah Likely (BAL)",
 
-      "Theo Johnson (NYG)",
-      "Daniel Bellinger (NYG)",
-
-      "Evan Engram (DEN)",
-      "Adam Trautman (DEN)",
-
-      "Mason Taylor (NYJ)",
-      "Jeremy Ruckert (NYJ)",
-
-      "Sam LaPorta (DET)",
-      "Brock Wright (DET)",
-
-      "Travis Kelce (KC)",
-      "Noah Gray (KC)",
+      "Durham Smythe (MIA)",
+      "Jonnu Smith (MIA)",
 
       "Cole Kmet (CHI)",
-      "Colston Loveland (CHI)",
+      "Gerald Everett (CHI)",
+
+      "Mike Gesicki (CIN)",
+      "Tanner Hudson (CIN)",
+
+      "Noah Fant (SEA)",
+      "Pharaoh Brown (SEA)",
 
       "Zach Ertz (WAS)",
-      "John Bates (WAS)"
-   ],
+      "Ben Sinnott (WAS)",
+
+      "Jake Ferguson (DAL)",
+      "Luke Schoonmaker (DAL)",
+
+      "Trey McBride (ARI)",
+      "Elijah Higgins (ARI)"
+    ],
     "k": [
-      "Jake Elliott (PHI)",
-      "Graham Gano (NYG)",
-      "Wil Lutz (DEN)",
-      "Nick Folk (NYJ)",
-      "Jake Bates (DET)",
-      "Harrison Butker (KC)",
+      "Justin Tucker (BAL)",
+      "Jason Sanders (MIA)",
       "Cairo Santos (CHI)",
-      "Matt Gay (WAS)"
+      "Evan McPherson (CIN)",
+      "Jason Myers (SEA)",
+      "Brandon McManus (WAS)",
+      "Brandon Aubrey (DAL)",
+      "Matt Prater (ARI)"
     ]
   }
 }
