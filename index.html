@@ -564,7 +564,7 @@ function setRandomTagline() {
      - Change ?week= in URL to switch (e.g., ?week=5)
      - FORCE_REVEAL with ?reveal=1 to test
      ========================= */
-  const ACTIVE_WEEK = Number(new URLSearchParams(location.search).get('week')) || 9;
+  const ACTIVE_WEEK = Number(new URLSearchParams(location.search).get('week')) || 13;
   const FORCE_REVEAL = new URLSearchParams(location.search).has('reveal');
 
   // Per-week CSV links (Publish to web → that week's "submissions" → CSV)
@@ -572,7 +572,7 @@ function setRandomTagline() {
     '1': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=0&single=true&output=csv',
     '6': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=1258487265&single=true&output=csv',
     '9': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=2039561635&single=true&output=csv', 
-    '14':'',  // TODO
+    '13':'https://docs.google.com/spreadsheets/d/e/2PACX-1vSldDkrQHAfBel9ImfzVJ9ZxYV9I9yNikKrRAjChBmktW7nU6BZchcVMsntpeh3rAztzi0-1QKR5QqQ/pub?gid=822663454&single=true&output=csv',  // TODO
     '18':''   // TODO
   };
  function csvUrl(){ return WEEK_CSV[String(ACTIVE_WEEK)] || ''; }
@@ -582,7 +582,7 @@ function setRandomTagline() {
     '1':  '2025-09-07T12:00:00-05:00', // Week 1 (CDT)
     '6':  '2025-10-12T12:00:00-02:00', // Week 6 (CDT)
     '9':  '2025-11-02T12:00:00-06:00', // Week 9 (CST starts)
-    '13': '2025-11-30T12:00:00-06:00', // Week 13
+    '13': '2025-11-28T12:00:00-08:00', // Week 13
     '17': '2025-12-28T12:00:00-06:00'  // Week 17
   };
   function isRevealedNow(){
